@@ -18,6 +18,11 @@ function enterDeleteMode() {
 // Function for leaving deletion mode
 function exitDeleteMode() {
     deleteMode = false;
+    // Select all checkboxes in the table
+    const checkboxes = document.querySelectorAll('#dataTable .delete-checkbox');
+            
+    // Uncheck each checkbox
+    checkboxes.forEach(checkbox => checkbox.checked = false);
     rowsToDelete.clear();
     
     // Hide delete column and remove highlights

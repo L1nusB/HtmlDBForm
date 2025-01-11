@@ -310,6 +310,22 @@
                 $('#confirmDeleteModal').modal('hide');
                 exitDeleteMode();
             });
+
+            // Delete checkbox change handler
+            $('#dataTable').on('change', '.delete-checkbox', function() {
+                if (!deleteMode) return;
+                
+                const rowIndex = $(this).data('row');
+                const row = $(this).closest('tr');
+                
+                if (this.checked) {
+                    rowsToDelete.add(rowIndex);
+                    row.addClass('table-danger');
+                } else {
+                    rowsToDelete.delete(rowIndex);
+                    row.removeClass('table-danger');
+                }
+            });
         
             // Handle checkbox changes
             $('#dataTable').on('change', '.process-checkbox', function() {
