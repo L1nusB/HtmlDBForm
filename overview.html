@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Data Table</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <style>
+        .table {
+            width: auto;
+            min-width: 50%;
+        }
+        .checkbox-cell {
+            text-align: center;
+        }
+        .dataTables_filter {
+            margin-bottom: 1rem;
+        }
+        /* More specific selector to override Bootstrap's table background */
+        tr.modified-row,
+        tr.modified-row > td {
+            background-color: #fff3cd !important;
+        }
+        /* Maintain striping for modified rows */
+        tr.modified-row:nth-of-type(odd) > td {
+            background-color: #fff3cd !important;
+        }
+        tr.modified-row:nth-of-type(even) > td {
+            background-color: #fff3cd !important;
+        }
+        .action-buttons {
+            margin-bottom: 1rem;
+        }
+        .revert-cell {
+            width: 40px;
+            text-align: center;
+        }
+        .revert-btn {
+            color: #6c757d;  /* Default grey color */
+        }
+        .revert-btn.active {
+            color: #dc3545;  /* Red color for active state */
+            cursor: pointer;
+        }
+        .revert-btn.active:hover {
+            color: #bb2d3b;  /* Darker red on hover for active state */
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body class="container py-4">
+    <h2>Data Table</h2>
+    <div class="action-buttons">
+        <button id="modifyBtn" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Modify
+        </button>
+        <button id="saveBtn" class="btn btn-success d-none">
+            <i class="bi bi-check-lg"></i> Save
+        </button>
+        <button id="cancelBtn" class="btn btn-danger d-none">
+            <i class="bi bi-x-lg"></i> Cancel
+        </button>
+    </div>
+    <table id="dataTable" class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th class="border-0">Process 1</th>
+                <th class="border-0">Process 2</th>
+                <th class="revert-cell d-none border-0">Revert</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="saveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <!-- Toast message will be set dynamically -->
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modals -->
+    <div class="modal fade" id="saveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Save</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to save your changes?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id="confirmSave">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Cancel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to discard all changes?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id="confirmCancel">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Overview + Modify JS -->
+     <script src="table.js"></script>
+     <script src="utils.js"></script>
+     <script src="overview.js"></script>
+
+     <script>
+        // Mock data
+        let data = [
+            { number: "A123", name: "John Smith", process1: true, process2: false },
+            { number: "B456", name: "Jane Doe", process1: false, process2: true },
+            { number: "C789", name: "Bob Johnson", process1: true, process2: true },
+            { number: "D012", name: "Alice Brown", process1: false, process2: false },
+            { number: "E345", name: "Charlie Davis", process1: true, process2: false }
+        ];
+
+        $(document).ready(function() {
+            initializeTable();
+        
+            // Handle Modify button click
+            $('#modifyBtn').click(enterEditMode);
+        
+            // Handle checkbox changes
+            $('#dataTable').on('change', '.process-checkbox', function() {
+                if (editMode) {
+                    const checkbox = $(this);
+                    const rowIndex = checkbox.data('row');
+                    const process = checkbox.data('process');
+                    
+                    data[rowIndex][process] = checkbox.prop('checked');
+                    modifiedRows.add(rowIndex);
+                    
+                    updateRowHighlight(rowIndex);
+                }
+            });
+        
+            // Handle revert button clicks
+            $('#dataTable').on('click', '.revert-btn', function() {
+                const rowIndex = $(this).data('row');
+                revertRow(rowIndex);
+            });
+        
+            // Handle Save button click
+            $('#saveBtn').click(function() {
+                if (modifiedRows.size > 0) {
+                    $('#saveModal').modal('show');
+                } else {
+                    finalizeSave();
+                }
+            });
+        
+            // Handle Cancel button click
+            $('#cancelBtn').click(function() {
+                if (modifiedRows.size > 0) {
+                    $('#cancelModal').modal('show');
+                } else {
+                    data = JSON.parse(JSON.stringify(originalData));
+                    table.clear().rows.add(data).draw(false);
+                    // Re-enable checkboxes if still in edit mode
+                    if (editMode) {
+                        $('.process-checkbox').prop('disabled', false);
+                    }
+                    exitEditMode();
+                }
+            });
+        
+            // Handle Save confirmation
+            $('#confirmSave').click(function() {
+                $('#saveModal').modal('hide');
+                finalizeSave();
+            });
+        
+            // Handle Cancel confirmation
+            $('#confirmCancel').click(function() {
+                $('#cancelModal').modal('hide');
+                data = JSON.parse(JSON.stringify(originalData));
+                table.clear().rows.add(data).draw(false);
+                // Re-enable checkboxes if still in edit mode
+                if (editMode) {
+                    $('.process-checkbox').prop('disabled', false);
+                }
+                exitEditMode();
+            });
+        });
+     </script>
+</body>
+</html>
