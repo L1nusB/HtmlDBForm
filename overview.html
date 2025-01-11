@@ -78,9 +78,9 @@
             <tr>
                 <th>Number</th>
                 <th>Name</th>
-                <th class="border-0">Process 1</th>
-                <th class="border-0">Process 2</th>
-                <th class="revert-cell d-none border-0">Revert</th>
+                <th>Process 1</th>
+                <th>Process 2</th>
+                <th class="revert-cell d-none">Revert</th>
             </tr>
         </thead>
         <tbody>
@@ -173,9 +173,7 @@
                     const process = checkbox.data('process');
                     
                     data[rowIndex][process] = checkbox.prop('checked');
-                    modifiedRows.add(rowIndex);
-                    
-                    updateRowHighlight(rowIndex);
+                    updateModifiedState(rowIndex);
                 }
             });
         

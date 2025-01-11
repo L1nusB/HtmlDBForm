@@ -7,6 +7,12 @@ function enterEditMode() {
     $('.process-checkbox').prop('disabled', false);
     $('#modifyBtn').addClass('d-none');
     $('#saveBtn, #cancelBtn').removeClass('d-none');
+
+    // Clear modified rows and check initial state
+    modifiedRows.clear();
+    data.forEach((_, index) => {
+        updateModifiedState(index);
+    });
 }
 
 function exitEditMode() {
@@ -14,6 +20,7 @@ function exitEditMode() {
     $('.process-checkbox').prop('disabled', true);
     $('#modifyBtn').removeClass('d-none');
     $('#saveBtn, #cancelBtn').addClass('d-none');
+    table.$('.revert-btn').removeClass('active');
     table.column(-1).visible(false);
     $('.revert-cell').addClass('d-none');
     modifiedRows.clear();
@@ -41,7 +48,6 @@ function revertRow(rowIndex) {
 function updateRowHighlight() {
     // First remove all highlights and active revert buttons
     table.$('tr').removeClass('modified-row');
-    console.log("Remove");
     table.$('.revert-btn').removeClass('active');
     
     // Then add highlight to modified rows and activate their revert buttons
@@ -65,4 +71,24 @@ function finalizeSave() {
     
     showToast(message, hasChanges);
     exitEditMode();
+}
+
+function isRowModified(rowIndex) {
+    if (!originalData) return false;
+    
+    const original = originalData[rowIndex];
+    const current = data[rowIndex];
+    
+    // Compare process1 and process2 values
+    return original.process1 !== current.process1 || 
+           original.process2 !== current.process2;
+}
+
+function updateModifiedState(rowIndex) {
+    if (isRowModified(rowIndex)) {
+        modifiedRows.add(rowIndex);
+    } else {
+        modifiedRows.delete(rowIndex);
+    }
+    updateRowHighlight();
 }
