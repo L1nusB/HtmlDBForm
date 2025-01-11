@@ -14,8 +14,7 @@
     
     <style>
         .table {
-            width: auto;
-            min-width: 50%;
+            width: 100% !important;
         }
         .checkbox-cell {
             text-align: center;
@@ -59,8 +58,9 @@
             z-index: 1050;
         }
         .delete-checkbox-cell {
-            width: 40px;
+            width: 40px !important;
             text-align: center;
+            padding: 0.5rem !important;
         }
         /* Ensure the danger background is visible even with striping */
         .table-danger,
@@ -92,7 +92,7 @@
     <table id="dataTable" class="table">
         <thead>
             <tr>
-                <th class="d-none">#</th>
+                <th class="delete-checkbox-cell d-none">#</th>
                 <th>Number</th>
                 <th>Name</th>
                 <th>Process 1</th>
@@ -232,7 +232,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtnModal">Yes</button>
+                    <button type="button" class="btn btn-danger" id="finalConfirmDeleteBtn">Yes</button>
                 </div>
             </div>
         </div>

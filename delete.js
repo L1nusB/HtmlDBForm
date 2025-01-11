@@ -6,6 +6,8 @@ function enterDeleteMode() {
     // Show delete column and buttons
     table.column(0).visible(true);
     $('.delete-checkbox-cell').removeClass('d-none');
+    console.log("Enter");
+    $('.delete-checkbox-cell').removeClass('dt-ordering-asc');
     
     // Update button states
     $('#deleteBtn').addClass('d-none');
