@@ -73,11 +73,17 @@
 <body class="container py-4">
     <h2>Data Table</h2>
     <div class="action-buttons">
-        <button id="addEntriesBtn" class="btn btn-success me-2">
-            <i class="bi bi-plus-lg"></i> Add
-        </button>
         <button id="deleteBtn" class="btn btn-danger me-2">
             <i class="bi bi-trash"></i> Delete
+        </button>
+        <button id="confirmDeleteModeBtn" class="btn btn-danger me-2 d-none">
+            <i class="bi bi-check-lg"></i> Confirm
+        </button>
+        <button id="cancelDeleteBtn" class="btn btn-secondary me-2 d-none">
+            <i class="bi bi-x-lg"></i> Cancel
+        </button>
+        <button id="addEntriesBtn" class="btn btn-success me-2">
+            <i class="bi bi-plus-lg"></i> Add
         </button>
         <button id="modifyBtn" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Modify
@@ -249,7 +255,7 @@
     <!-- Overview + Modify JS -->
      <script src="table.js"></script>
      <script src="utils.js"></script>
-     <script src="overview.js"></script>
+     <script src="editMode.js"></script>
      <script src="addModal.js"></script>
      <script src="delete.js"></script>
 
@@ -273,11 +279,10 @@
             $('#deleteBtn').click(enterDeleteMode);
 
             // Cancel delete button click handler
-            $(document).on('click', '#cancelDeleteBtn', exitDeleteMode);
+            $('#cancelDeleteBtn').click(exitDeleteMode);
 
             // Confirm delete button click handler
-            $(document).on('click', '#confirmDeleteBtn', function() {
-                console.log("First");
+            $('#confirmDeleteModeBtn').click(function() {
                 if (rowsToDelete.size === 0) {
                     showToast("No rows selected for deletion", false);
                     exitDeleteMode();

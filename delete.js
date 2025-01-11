@@ -1,23 +1,21 @@
-// Add functions for deletion mode
+// Add functions for entering deletion mode
 function enterDeleteMode() {
     deleteMode = true;
     rowsToDelete.clear();
     
-    // Show delete column and buttons
+    // Show delete column
     table.column(0).visible(true);
     $('.delete-checkbox-cell').removeClass('d-none');
-    console.log("Enter");
-    $('.delete-checkbox-cell').removeClass('dt-ordering-asc');
     
     // Update button states
     $('#deleteBtn').addClass('d-none');
+    $('#confirmDeleteModeBtn, #cancelDeleteBtn').removeClass('d-none');
     $('#modifyBtn, #addEntriesBtn').prop('disabled', true);
-    $('<button id="confirmDeleteBtn" class="btn btn-danger me-2"><i class="bi bi-check-lg"></i> Confirm</button>').insertAfter('#deleteBtn');
-    $('<button id="cancelDeleteBtn" class="btn btn-secondary me-2"><i class="bi bi-x-lg"></i> Cancel</button>').insertAfter('#confirmDeleteBtn');
     
     table.draw(false);
 }
 
+// Function for leaving deletion mode
 function exitDeleteMode() {
     deleteMode = false;
     rowsToDelete.clear();
@@ -29,7 +27,7 @@ function exitDeleteMode() {
     
     // Restore button states
     $('#deleteBtn').removeClass('d-none');
-    $('#confirmDeleteBtn, #cancelDeleteBtn').remove();
+    $('#confirmDeleteModeBtn, #cancelDeleteBtn').addClass('d-none');
     $('#modifyBtn, #addEntriesBtn').prop('disabled', false);
     
     table.draw(false);
