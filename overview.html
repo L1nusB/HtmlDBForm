@@ -58,6 +58,16 @@
             right: 20px;
             z-index: 1050;
         }
+        .delete-checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+        /* Ensure the danger background is visible even with striping */
+        .table-danger,
+        .table-danger > td,
+        .table-danger > th {
+            background-color: #f8d7da !important;
+        }
     </style>
 </head>
 <body class="container py-4">
@@ -66,19 +76,23 @@
         <button id="addEntriesBtn" class="btn btn-success me-2">
             <i class="bi bi-plus-lg"></i> Add
         </button>
+        <button id="deleteBtn" class="btn btn-danger me-2">
+            <i class="bi bi-trash"></i> Delete
+        </button>
         <button id="modifyBtn" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Modify
         </button>
-        <button id="saveBtn" class="btn btn-success d-none">
+        <button id="modifySaveBtn" class="btn btn-success d-none">
             <i class="bi bi-check-lg"></i> Save
         </button>
-        <button id="cancelBtn" class="btn btn-danger d-none">
+        <button id="modifyCancelBtn" class="btn btn-danger d-none">
             <i class="bi bi-x-lg"></i> Cancel
         </button>
     </div>
     <table id="dataTable" class="table">
         <thead>
             <tr>
+                <th class="d-none">#</th>
                 <th>Number</th>
                 <th>Name</th>
                 <th>Process 1</th>
@@ -205,6 +219,25 @@
         </div>
     </div>
 
+    <!-- Modal HTML structure for confirming deletion -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the selected rows? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtnModal">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
@@ -218,6 +251,7 @@
      <script src="utils.js"></script>
      <script src="overview.js"></script>
      <script src="addModal.js"></script>
+     <script src="delete.js"></script>
 
      <script>
         // Mock data
@@ -234,6 +268,43 @@
         
             // Handle Modify button click
             $('#modifyBtn').click(enterEditMode);
+
+            // Delete button click handler
+            $('#deleteBtn').click(enterDeleteMode);
+
+            // Cancel delete button click handler
+            $(document).on('click', '#cancelDeleteBtn', exitDeleteMode);
+
+            // Confirm delete button click handler
+            $(document).on('click', '#confirmDeleteBtn', function() {
+                console.log("First");
+                if (rowsToDelete.size === 0) {
+                    showToast("No rows selected for deletion", false);
+                    exitDeleteMode();
+                    return;
+                }
+                
+                $('#confirmDeleteModal').modal('show');
+            });
+            
+            // Final delete confirmation handler
+            $('#confirmDeleteBtnModal').click(function() {
+                console.log("Second");
+                const rowIndices = Array.from(rowsToDelete).sort((a, b) => b - a);
+                
+                // Remove the rows from the data array
+                rowIndices.forEach(index => {
+                    data.splice(index, 1);
+                });
+                
+                // Update the table
+                table.clear().rows.add(data).draw();
+                
+                // Show success message and exit delete mode
+                showToast(`Successfully deleted ${rowIndices.length} rows`, true);
+                $('#confirmDeleteModal').modal('hide');
+                exitDeleteMode();
+            });
         
             // Handle checkbox changes
             $('#dataTable').on('change', '.process-checkbox', function() {
@@ -254,7 +325,7 @@
             });
         
             // Handle Save button click
-            $('#saveBtn').click(function() {
+            $('#modifySaveBtn').click(function() {
                 if (modifiedRows.size > 0) {
                     $('#saveModal').modal('show');
                 } else {
@@ -263,7 +334,7 @@
             });
         
             // Handle Cancel button click
-            $('#cancelBtn').click(function() {
+            $('#modifyCancelBtn').click(function() {
                 if (modifiedRows.size > 0) {
                     $('#cancelModal').modal('show');
                 } else {

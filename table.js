@@ -3,10 +3,23 @@ let modifiedRows = new Set();
 let table;
 let editMode = false;
 
+// Add new deletion-related variables
+let deleteMode = false;
+let rowsToDelete = new Set();
+
 function initializeTable() {
     table = $('#dataTable').DataTable({
         data: data,
         columns: [
+            {
+                data: null,
+                orderable: false,
+                className: 'delete-checkbox-cell d-none',
+                render: function(data, type, row, meta) {
+                    return '<input type="checkbox" class="delete-checkbox" data-row="' + meta.row + '">';
+                },
+                width: '40px'
+            },
             { 
                 data: 'number',
                 className: 'text-start'
