@@ -1,12 +1,13 @@
 function enterEditMode() {
+    $('#deleteBtn').prop('disabled', true); // Disable Delete button
     editMode = true;
     originalData = JSON.parse(JSON.stringify(data));
     table.column(-1).visible(true, false);
     $('.revert-cell').removeClass('d-none');
     table.draw(false);
     $('.process-checkbox').prop('disabled', false);
-    $('#saveBtn, #modifyBtn').addClass('d-none');
-    $('#saveBtn, #cancelBtn').removeClass('d-none');
+    $('#modifySaveBtn, #modifyBtn').addClass('d-none');
+    $('#modifySaveBtn, #modifyCancelBtn').removeClass('d-none');
     $('#addEntriesBtn').prop('disabled', true); // Disable Add button
 
     // Clear modified rows and check initial state
@@ -17,10 +18,11 @@ function enterEditMode() {
 }
 
 function exitEditMode() {
+    $('#deleteBtn').prop('disabled', false); // Enable Delete button
     editMode = false;
     $('.process-checkbox').prop('disabled', true);
     $('#modifyBtn').removeClass('d-none');
-    $('#saveBtn, #cancelBtn').addClass('d-none');
+    $('#modifySaveBtn, #modifyCancelBtn').addClass('d-none');
     $('#addEntriesBtn').prop('disabled', false); // Enable Add button
     table.$('.revert-btn').removeClass('active');
     table.column(-1).visible(false);
