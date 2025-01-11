@@ -5,8 +5,9 @@ function enterEditMode() {
     $('.revert-cell').removeClass('d-none');
     table.draw(false);
     $('.process-checkbox').prop('disabled', false);
-    $('#modifyBtn').addClass('d-none');
+    $('#saveBtn, #modifyBtn').addClass('d-none');
     $('#saveBtn, #cancelBtn').removeClass('d-none');
+    $('#addEntriesBtn').prop('disabled', true); // Disable Add button
 
     // Clear modified rows and check initial state
     modifiedRows.clear();
@@ -20,6 +21,7 @@ function exitEditMode() {
     $('.process-checkbox').prop('disabled', true);
     $('#modifyBtn').removeClass('d-none');
     $('#saveBtn, #cancelBtn').addClass('d-none');
+    $('#addEntriesBtn').prop('disabled', false); // Enable Add button
     table.$('.revert-btn').removeClass('active');
     table.column(-1).visible(false);
     $('.revert-cell').addClass('d-none');
