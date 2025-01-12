@@ -253,8 +253,9 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
     <!-- Overview + Modify JS -->
-     <script src="table.js"></script>
+     <script src="dynamicColumns.js"></script>
      <script src="utils.js"></script>
+     <script src="table.js"></script>
      <script src="editMode.js"></script>
      <script src="addModal.js"></script>
      <script src="delete.js"></script>
@@ -262,14 +263,20 @@
      <script>
         // Mock data
         let data = [
-            { number: "A123", name: "John Smith", process1: true, process2: false },
-            { number: "B456", name: "Jane Doe", process1: false, process2: true },
-            { number: "C789", name: "Bob Johnson", process1: true, process2: true },
-            { number: "D012", name: "Alice Brown", process1: false, process2: false },
-            { number: "E345", name: "Charlie Davis", process1: true, process2: false }
+            { number: "A123", name: "John Smith", process1: true, process2: false, process3: true},
+            { number: "B456", name: "Jane Doe", process1: false, process2: true, process3: false},
+            { number: "C789", name: "Bob Johnson", process1: true, process2: true, process3: true, process4: true},
+            { number: "D012", name: "Alice Brown", process1: false, process2: false, process3: true },
+            { number: "E345", name: "Charlie Davis", process1: true, process2: false, process3: true }
         ];
 
         $(document).ready(function() {
+            // Replace the static table with our dynamic one
+            $('#dataTable').replaceWith(generateTableHeader());
+                
+            // Add the dynamic modal structure for adding new entries
+            $('#addEntriesModal').replaceWith(generateAddEntriesModal());
+
             initializeTable();
         
             // Handle Modify button click
@@ -401,10 +408,13 @@
                 
                 const newEntry = {
                     number: $('#newEntryNumber').val().trim(),
-                    name: $('#newEntryName').val().trim(),
-                    process1: $('#newEntryProcess1').prop('checked'),
-                    process2: $('#newEntryProcess2').prop('checked')
+                    name: $('#newEntryName').val().trim()
                 };
+                
+                // Add process values dynamically
+                processColumns.forEach(col => {
+                    newEntry[col.toLowerCase()] = $(`#newEntry${col}`).prop('checked');
+                });
                 
                 tempEntries.push(newEntry);
                 updateTempEntriesTable();

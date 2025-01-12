@@ -5,8 +5,9 @@ let tempEntries = [];
 function resetEntryForm() {
     $('#newEntryNumber').val('').removeClass('is-invalid');
     $('#newEntryName').val('').removeClass('is-invalid');
-    $('#newEntryProcess1').prop('checked', false);
-    $('#newEntryProcess2').prop('checked', false);
+    processColumns.forEach(col => {
+        $(`#newEntry${col}`).prop('checked', false);
+    });
 }
 
 // Function to validate the entry form
@@ -36,16 +37,17 @@ function updateTempEntriesTable() {
     tbody.empty();
     
     tempEntries.forEach((entry, index) => {
+        const processColumnsHTML = processColumns.map(col => `
+            <td class="text-center">
+                <i class="bi ${entry[col.toLowerCase()] ? 'bi-check-lg text-success' : 'bi-x-lg text-danger'}"></i>
+            </td>
+        `).join('');
+        
         tbody.append(`
             <tr>
                 <td>${entry.number}</td>
                 <td>${entry.name}</td>
-                <td class="text-center">
-                    <i class="bi ${entry.process1 ? 'bi-check-lg text-success' : 'bi-x-lg text-danger'}"></i>
-                </td>
-                <td class="text-center">
-                    <i class="bi ${entry.process2 ? 'bi-check-lg text-success' : 'bi-x-lg text-danger'}"></i>
-                </td>
+                ${processColumnsHTML}
                 <td class="text-center">
                     <button class="btn btn-link text-danger p-0 remove-temp-entry" data-index="${index}">
                         <i class="bi bi-trash"></i>
@@ -55,6 +57,5 @@ function updateTempEntriesTable() {
         `);
     });
     
-    // Show/hide the temporary entries container
     $('#tempEntriesContainer').toggleClass('d-none', tempEntries.length === 0);
 }
