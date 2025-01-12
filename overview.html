@@ -274,8 +274,8 @@
             // Replace the static table with our dynamic one
             $('#dataTable').replaceWith(generateTableHeader());
                 
-            // Add the dynamic modal
-            $('body').append(generateAddEntriesModal());
+            // Add the dynamic modal structure for adding new entries
+            $('#addEntriesModal').replaceWith(generateAddEntriesModal());
 
             initializeTable();
         

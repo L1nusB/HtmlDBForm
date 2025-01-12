@@ -21,6 +21,7 @@ function generateTableHeader() {
 
 // Update the add entries modal HTML to be dynamic
 function generateAddEntriesModal() {
+    console.log("This is the processColumns: ", processColumns);
     return `
     <div class="modal fade" id="addEntriesModal" tabindex="-1">
         <div class="modal-dialog modal-lg">

@@ -37,7 +37,7 @@ function updateTempEntriesTable() {
     tbody.empty();
     
     tempEntries.forEach((entry, index) => {
-        const processColumns = processColumns.map(col => `
+        const processColumnsHTML = processColumns.map(col => `
             <td class="text-center">
                 <i class="bi ${entry[col.toLowerCase()] ? 'bi-check-lg text-success' : 'bi-x-lg text-danger'}"></i>
             </td>
@@ -47,7 +47,7 @@ function updateTempEntriesTable() {
             <tr>
                 <td>${entry.number}</td>
                 <td>${entry.name}</td>
-                ${processColumns}
+                ${processColumnsHTML}
                 <td class="text-center">
                     <button class="btn btn-link text-danger p-0 remove-temp-entry" data-index="${index}">
                         <i class="bi bi-trash"></i>

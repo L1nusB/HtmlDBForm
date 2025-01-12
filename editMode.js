@@ -82,10 +82,9 @@ function isRowModified(rowIndex) {
     
     const original = originalData[rowIndex];
     const current = data[rowIndex];
-    
-    // Compare process1 and process2 values
-    return original.process1 !== current.process1 || 
-           original.process2 !== current.process2;
+
+    // Check if both are the same object reference (see utils.js)
+    return !deepEqual(original, current);
 }
 
 function updateModifiedState(rowIndex) {
