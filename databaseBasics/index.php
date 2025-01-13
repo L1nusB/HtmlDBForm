@@ -60,6 +60,7 @@ if (function_exists('sqlsrv_connect')) {
     </style>
 </head>
 <body>
+    <!-- Run browser-sync start --config databaseBasics/browser-sync-config.js -->
     <h1>Local Database Connection Test</h1>
     <div class="status <?php echo ($conn ? 'success' : 'error'); ?>">
         <?php
@@ -89,5 +90,18 @@ if (function_exists('sqlsrv_connect')) {
         <p>PHP.ini location: <?php echo php_ini_loaded_file(); ?></p>
         <p>Extension directory: <?php echo php_ini_scanned_files(); ?></p>
     </div>
+
+    <script> //Auto refresh page
+        // Only use during development
+        (function() {
+            const timestamp = new Date().getTime();
+            fetch(window.location.href + '?_=' + timestamp)
+                .then(response => {
+                    if (response.status === 200) {
+                        setTimeout(arguments.callee, 1000);
+                    }
+                });
+        })();
+    </script>
 </body>
 </html>
