@@ -1,27 +1,22 @@
 <?php
 // Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Check if PHP SQL Server extension is loaded
-echo "<h2>PHP Configuration Check:</h2>";
-echo "PHP Version: " . phpversion() . "<br>";
-echo "SQL Server extension loaded: " . (extension_loaded('sqlsrv') ? 'Yes' : 'No') . "<br><br>";
+error_reporting(error_level: E_ALL);
+ini_set(option: 'display_errors', value: 1);
 
 // Database configuration
-$serverName = "DESKTOP-38K7GFG"; // Common default for SQL Server Express
+$serverName = "DESKTOP-38K7GFG";
 $connectionInfo = array(
     "Database" => "Serviscope",
     "TrustServerCertificate" => true
 );
 
-// Attempt connection
-if (function_exists('sqlsrv_connect')) {
-    $conn = sqlsrv_connect($serverName, $connectionInfo);
-} else {
-    $conn = false;
-    echo "SQL Server functions not available. Please check PHP SQLServer extension installation.<br>";
-}
+// Establish connection
+$conn = sqlsrv_connect($serverName,$connectionInfo);
+
+// Query to fetch data from the view
+$sql = "SELECT RZBK, Name, ProduktionsStart, Prozessname, Standort_Kuerzel FROM USEAP_RPA_ViewProzessUebersicht ORDER BY ProduktionsStart DESC";
+$result = sqlsrv_query($conn, $sql);
+
 ?>
 
 <!DOCTYPE html>
@@ -29,79 +24,85 @@ if (function_exists('sqlsrv_connect')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Database Connection Test</title>
+    <title>Process Overview</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
             line-height: 1.6;
         }
-        .status {
-            padding: 20px;
-            border-radius: 5px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
         }
-        .success {
-            background-color: #dff0d8;
-            color: #3c763d;
-            border: 1px solid #d6e9c6;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
         }
         .error {
-            background-color: #f2dede;
-            color: #a94442;
-            border: 1px solid #ebccd1;
-        }
-        .debug {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 20px;
-            margin-top: 20px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <!-- Run browser-sync start --config databaseBasics/browser-sync-config.js -->
-    <h1>Local Database Connection Test</h1>
-    <div class="status <?php echo ($conn ? 'success' : 'error'); ?>">
-        <?php
-        if ($conn) {
-            echo "Connection established successfully!";
-        } else {
-            echo "Connection failed.<br>";
-            if (function_exists('sqlsrv_errors')) {
-                $errors = sqlsrv_errors();
-                if ($errors) {
-                    echo "Errors:<br>";
-                    foreach ($errors as $error) {
-                        echo "SQLSTATE: " . $error['SQLSTATE'] . "<br>";
-                        echo "Code: " . $error['code'] . "<br>";
-                        echo "Message: " . $error['message'] . "<br>";
-                    }
+    <h1>Process Overview</h1>
+
+    <?php
+    if (!$conn) {
+        echo '<div class="error">Database connection failed:<br>';
+        echo print_r(value: sqlsrv_errors(), return: true) . '</div>';
+    } elseif (!$result) {
+        echo '<div class="error">Query execution failed:<br>';
+        echo print_r(value: sqlsrv_errors(), return: true) . '</div>';
+    } else {
+    ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>RZBK</th>
+                    <th>Name</th>
+                    <th>ProduktionsStart</th>
+                    <th>Prozessname</th>
+                    <th>Standort</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                    echo "<tr>";
+                    echo "<td>" . htmlspecialchars(string: $row['RZBK']) . "</td>";
+                    echo "<td>" . htmlspecialchars(string: $row['Name']) . "</td>";
+                    // Format the date nicely
+                    echo "<td>" . ($row['ProduktionsStart'] ? $row['ProduktionsStart']->format('Y-m-d') : '') . "</td>";
+                    echo "<td>" . htmlspecialchars(string: $row['Prozessname']) . "</td>";
+                    echo "<td>" . htmlspecialchars(string: $row['Standort_Kuerzel']) . "</td>";
+                    echo "</tr>";
                 }
-            }
-        }
-        ?>
-    </div>
+                ?>
+            </tbody>
+        </table>
+    <?php
+    }
 
-    <div class="debug">
-        <h3>Debug Information:</h3>
-        <p>Server Name: <?php echo $serverName; ?></p>
-        <p>Database Name: <?php echo $connectionInfo['Database']; ?></p>
-        <p>PHP.ini location: <?php echo php_ini_loaded_file(); ?></p>
-        <p>Extension directory: <?php echo php_ini_scanned_files(); ?></p>
-    </div>
-
-    <script> //Auto refresh page
-        // Only use during development
-        (function() {
-            const timestamp = new Date().getTime();
-            fetch(window.location.href + '?_=' + timestamp)
-                .then(response => {
-                    if (response.status === 200) {
-                        setTimeout(arguments.callee, 1000);
-                    }
-                });
-        })();
-    </script>
+    // Close the connection
+    sqlsrv_close(conn: $conn);
+    ?>
 </body>
 </html>
