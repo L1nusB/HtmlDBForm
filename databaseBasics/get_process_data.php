@@ -5,21 +5,11 @@ header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Database configuration
-$serverName = "DESKTOP-38K7GFG";
-$connectionInfo = array(
-    "Database" => "Serviscope",
-    "TrustServerCertificate" => true,
-    "CharacterSet" => "UTF-8"
-);
+require_once 'db_config.php';
 
 try {
-    // Establish connection
-    $conn = sqlsrv_connect($serverName, $connectionInfo);
-    
-    if (!$conn) {
-        throw new Exception("Database connection failed: " . print_r(sqlsrv_errors(), true));
-    }
+    // Get database connection
+    $conn = Database::getConnection();
 
     // Query to fetch data from the view
     $sql = "SELECT RZBK, Name, ProduktionsStart, Prozessname, Standort_Kuerzel FROM USEAP_RPA_ViewProzessUebersicht ORDER BY ProduktionsStart DESC";
@@ -42,8 +32,7 @@ try {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 } finally {
-    if (isset($conn)) {
-        sqlsrv_close($conn);
-    }
+    // Close the connection
+    Database::closeConnection();
 }
 ?>
