@@ -61,21 +61,6 @@ include 'db.php';
 
 header('Content-Type: application/json');
 
-// $query = "
-//     SELECT 
-//         b.RZBK, 
-//         b.Name, 
-//         p.Prozessname, 
-//         z.ProduktionsStart
-//     FROM 
-//         USEAP_RPA_Bankenuebersicht b
-//     LEFT JOIN 
-//         USEAP_RPA_Prozess_Zuweisung z ON b.RZBK = z.RZBK
-//     LEFT JOIN 
-//         USEAP_RPA_Prozesse p ON z.ProzessID = p.ProzessID
-//     ORDER BY 
-//         b.RZBK, p.Prozessname
-// ";
 $query = "
     SELECT 
         RZBK, 

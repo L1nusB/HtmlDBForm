@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    
+
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
@@ -22,6 +23,7 @@
         /* Optional custom styles */
     </style>
 </head>
+
 <body>
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
@@ -41,7 +43,7 @@
 
     <script>
         $(document).ready(function() {
-            // Fetch data and initialize DataTable
+            // First, fetch the data to create dynamic columns
             $.ajax({
                 url: 'data.php',
                 method: 'GET',
@@ -49,48 +51,62 @@
                 success: function(data) {
                     // Process data to create dynamic columns
                     const processNames = [...new Set(data.map(item => item.Prozessname))];
-                    const tableBody = $('#institutesTable tbody');
-                    
+
                     // Create header columns for processes
                     processNames.forEach(process => {
                         $('#institutesTable thead tr').append(`<th>${process}</th>`);
                     });
 
-                    // Group data by RZBK and Name
-                    const groupedData = {};
-                    data.forEach(item => {
-                        const key = `${item.RZBK}-${item.Name}`;
-                        if (!groupedData[key]) {
-                            groupedData[key] = { RZBK: item.RZBK, Name: item.Name, processes: {} };
-                        }
-                        groupedData[key].processes[item.Prozessname] = item.ProduktionsStart || null;
+                    // Initialize DataTable with dynamic columns
+                    const table = $('#institutesTable').DataTable({
+                        ajax: {
+                            url: 'data.php',
+                            dataSrc: function(json) {
+                                const groupedData = {};
+                                json.forEach(item => {
+                                    const key = `${item.RZBK}-${item.Name}`;
+                                    if (!groupedData[key]) {
+                                        groupedData[key] = {
+                                            RZBK: item.RZBK,
+                                            Name: item.Name,
+                                            processes: {}
+                                        };
+                                    }
+                                    groupedData[key].processes[item.Prozessname] = item.ProduktionsStart || null;
+                                });
+
+                                return Object.values(groupedData).map(row => {
+                                    const newRow = {
+                                        RZBK: row.RZBK,
+                                        Name: row.Name
+                                    };
+                                    processNames.forEach(process => {
+                                        newRow[process] = {
+                                            checked: row.processes[process] ? true : false,
+                                            startDate: row.processes[process] || ''
+                                        };
+                                    });
+                                    return newRow;
+                                });
+                            }
+                        },
+                        columns: [{
+                                data: 'RZBK'
+                            },
+                            {
+                                data: 'Name'
+                            },
+                            ...processNames.map(process => ({
+                                data: process,
+                                render: function(data) {
+                                    const startDate = data.startDate.date ? new Date(data.startDate.date) : null;
+                                    const formattedDate = startDate ? `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}` : '';
+                                    return `<input type="checkbox" ${data.checked ? 'checked' : ''} disabled>
+                                            <span>${formattedDate}</span>`;
+                                }
+                            }))
+                        ]
                     });
-
-                    // Populate table rows
-                    for (const key in groupedData) {
-                        const row = groupedData[key];
-                        const newRow = `<tr>
-                            <td>${row.RZBK}</td>
-                            <td>${row.Name}</td>`;
-                        
-                        processNames.forEach(process => {
-                            const startDate = row.processes[process];
-                            console.log(startDate);
-                            const checked = startDate ? 'checked' : '';
-                            console.log(checked);
-                            const displayStart = startDate ? startDate.toISOString().split('T')[0] : '';
-                            newRow += `<td>
-                                <input type="checkbox" ${checked} disabled>
-                                <span>${displayStart}</span>
-                            </td>`;
-                        });
-
-                        newRow += `</tr>`;
-                        tableBody.append(newRow);
-                    }
-
-                    // Initialize DataTable
-                    $('#institutesTable').DataTable();
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching data:', error);
@@ -99,4 +115,5 @@
         });
     </script>
 </body>
+
 </html>
