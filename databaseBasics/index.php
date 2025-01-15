@@ -1,3 +1,4 @@
+<!-- Do not forget browser-sync start --config databaseBasics/browser-sync-config.js -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
