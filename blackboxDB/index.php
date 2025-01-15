@@ -101,8 +101,12 @@
                                 render: function(data) {
                                     const startDate = data.startDate.date ? new Date(data.startDate.date) : null;
                                     const formattedDate = startDate ? `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}` : '';
-                                    return `<input type="checkbox" ${data.checked ? 'checked' : ''} disabled>
-                                            <span>${formattedDate}</span>`;
+                                    return `
+                                        <div class="d-flex flex-column flex-lg-row align-items-center">
+                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-sm-0 mr-sm-2">
+                                            <span>${formattedDate}</span>
+                                        </div>
+                                    `;
                                 }
                             }))
                         ]
