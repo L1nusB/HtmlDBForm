@@ -19,14 +19,15 @@
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
-    <style>
-        /* Optional custom styles */
-    </style>
 </head>
 
 <body>
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="toggleDates" checked>
+            <label class="form-check-label" for="toggleDates">Show Dates</label>
+        </div>
         <table id="institutesTable" class="table table-striped">
             <thead>
                 <tr>
@@ -42,6 +43,7 @@
     </div>
 
     <script>
+        let table;
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
             $.ajax({
@@ -58,7 +60,7 @@
                     });
 
                     // Initialize DataTable with dynamic columns
-                    const table = $('#institutesTable').DataTable({
+                    table = $('#institutesTable').DataTable({
                         ajax: {
                             url: 'data.php',
                             dataSrc: function(json) {
@@ -101,10 +103,14 @@
                                 render: function(data) {
                                     const startDate = data.startDate.date ? new Date(data.startDate.date) : null;
                                     const formattedDate = startDate ? `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}` : '';
+
+                                    // Check the state of the toggle switch
+                                    const showDates = $('#toggleDates').is(':checked');
+
                                     return `
-                                        <div class="d-flex flex-column flex-lg-row align-items-center">
-                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-sm-0 mr-sm-2">
-                                            <span>${formattedDate}</span>
+                                        <div class="d-flex flex-column flex-lg-row justify-content-center align-items-center h-100">
+                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-lg-0 mr-lg-2">
+                                            ${showDates ? `<span>${formattedDate}</span>` : ''}
                                         </div>
                                     `;
                                 }
@@ -115,6 +121,11 @@
                 error: function(xhr, status, error) {
                     console.error('Error fetching data:', error);
                 }
+            });
+
+            // Toggle dates on checkbox change
+            $('#toggleDates').change(function() {
+                table.rows().invalidate().draw();
             });
         });
     </script>
