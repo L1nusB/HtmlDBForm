@@ -24,8 +24,8 @@
 <body>
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="toggleDates" checked>
+        <div class="form-check form-switch">
+            <input type="checkbox" role="switch" class="form-check-input" id="toggleDates" checked>
             <label class="form-check-label" for="toggleDates">Show Dates</label>
         </div>
         <table id="institutesTable" class="table table-striped">
@@ -108,8 +108,9 @@
                                     const showDates = $('#toggleDates').is(':checked');
 
                                     return `
-                                        <div class="d-flex flex-column flex-lg-row justify-content-center align-items-center h-100">
-                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-lg-0 mr-lg-2">
+                                        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center h-100">
+                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-lg-0 mr-lg-2" 
+                                                data-toggle="tooltip" title="${data.startDate.date ? formattedDate : ''}">
                                             ${showDates ? `<span>${formattedDate}</span>` : ''}
                                         </div>
                                     `;
@@ -123,6 +124,9 @@
                 }
             });
 
+            // Initialize Bootstrap tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
             // Toggle dates on checkbox change
             $('#toggleDates').change(function() {
                 table.rows().invalidate().draw();
