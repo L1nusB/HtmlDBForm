@@ -88,6 +88,7 @@
     <script src="./js/addMode.js"></script>
     <script src="./js/deleteMode.js"></script>
     <script src="./js/editMode.js"></script>
+    <script src="./js/populateAddModal.js"></script>
 
     <script>
         let table;
@@ -209,6 +210,9 @@
                     // Enable the buttons after the table is initialized
                     enableButtons();
                     
+                    // Populate the Add Modal with process names
+                    popuplateAddModal();
+                    
                     //// Handlers to enter different modes
                     // Handle Modify button click to enter Edit mode
                     $('#modifyBtn').click(enterEditMode);
@@ -238,6 +242,11 @@
                         
                         // Handle modal hidden event
                         $('#addEntriesModal').on('hidden.bs.modal', resetOnHidden);
+
+                        // Handle checkbox changes
+                        document.querySelectorAll('.process-checkbox-new').forEach(checkbox => {
+                            checkbox.addEventListener('change', handleProcessCheckboxChanges);
+                        });
                     }
                     
                     //// ----- Deletion Mode ----- ////

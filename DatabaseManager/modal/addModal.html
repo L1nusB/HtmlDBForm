@@ -9,7 +9,7 @@
             <div class="modal-body">
                 <!-- Temporary entries table -->
                 <div id="tempEntriesContainer" class="mb-4 d-none">
-                    <h6>Entries to be added:</h6>
+                    <!-- <h6>Entries to be added:</h6>
                     <table class="table table-sm">
                         <thead>
                             <tr>
@@ -22,7 +22,7 @@
                         </thead>
                         <tbody id="tempEntriesBody">
                         </tbody>
-                    </table>
+                    </table> -->
                 </div>
                 
                 <!-- Entry form -->
@@ -37,17 +37,19 @@
                         <input type="text" class="form-control" id="newEntryName" required>
                         <div class="invalid-feedback">Please enter a name.</div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="newEntryProcess1">
-                            <label class="form-check-label" for="newEntryProcess1">Process 1</label>
+                    <div id="addModalProcessSelector" class="col-12">
+                        <!-- <div class="col-md-6">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="newEntryProcess1">
+                                <label class="form-check-label" for="newEntryProcess1">Process 1</label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="newEntryProcess2">
-                            <label class="form-check-label" for="newEntryProcess2">Process 2</label>
-                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="newEntryProcess2">
+                                <label class="form-check-label" for="newEntryProcess2">Process 2</label>
+                            </div>
+                        </div> -->
                     </div>
                     <div class="col-12">
                         <button id="addToTempBtn" class="btn btn-primary">

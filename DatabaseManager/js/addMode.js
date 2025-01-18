@@ -32,6 +32,19 @@ function validateEntryForm() {
 		$("#newEntryName").removeClass("is-invalid");
 	}
 
+    // Check all checked checkboxes have valid dates
+    document.querySelectorAll('.process-checkbox-new:checked').forEach(checkbox => {
+        const process = checkbox.dataset.process;
+        const dateInput = document.querySelector(`#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}`);
+        
+        if (!dateInput.value) {
+            dateInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            dateInput.classList.remove('is-invalid');
+        }
+    });
+
 	return isValid;
 }
 
@@ -116,4 +129,19 @@ function saveAddedEntries() {
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
 	tempEntries = [];
+}
+
+function handleProcessCheckboxChanges() {
+    // Handle checkbox changes
+    const process = this.dataset.process;
+    const dateInput = document.querySelector(`#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}`);
+    
+    if (this.checked) {
+        dateInput.removeAttribute('disabled');
+        dateInput.classList.add('required');
+    } else {
+        dateInput.setAttribute('disabled', '');
+        dateInput.classList.remove('required');
+        dateInput.classList.remove('is-invalid');
+    }
 }
