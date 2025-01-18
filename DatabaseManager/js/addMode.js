@@ -9,6 +9,16 @@ function enterAddMode() {
 function resetEntryForm() {
 	$("#newEntryNumber").val("").removeClass("is-invalid");
 	$("#newEntryName").val("").removeClass("is-invalid");
+    // Reset all checkboxes
+    document.querySelectorAll('.process-checkbox-new').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    // Reset all date inputs
+    document.querySelectorAll('.date-input-new').forEach(dateInput => {
+        dateInput.value = '';
+        dateInput.setAttribute('disabled', '');
+        dateInput.classList.remove('is-invalid');
+    });
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});
@@ -36,7 +46,8 @@ function validateEntryForm() {
     document.querySelectorAll('.process-checkbox-new:checked').forEach(checkbox => {
         const process = checkbox.dataset.process;
         const dateInput = document.querySelector(`#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}`);
-        
+        console.log(process);
+        console.log("#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}");
         if (!dateInput.value) {
             dateInput.classList.add('is-invalid');
             isValid = false;
