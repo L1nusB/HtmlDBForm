@@ -1,0 +1,55 @@
+.table {
+    width: 100% !important;
+}
+.checkbox-cell {
+    text-align: center;
+}
+.dataTables_filter {
+    margin-bottom: 1rem;
+}
+/* More specific selector to override Bootstrap's table background */
+tr.modified-row,
+tr.modified-row > td {
+    background-color: #fff3cd !important;
+}
+/* Maintain striping for modified rows */
+tr.modified-row:nth-of-type(odd) > td {
+    background-color: #fff3cd !important;
+}
+tr.modified-row:nth-of-type(even) > td {
+    background-color: #fff3cd !important;
+}
+.action-buttons {
+    margin-bottom: 1rem;
+}
+.revert-cell {
+    width: 40px;
+    text-align: center;
+}
+.revert-btn {
+    color: #6c757d;  /* Default grey color */
+}
+.revert-btn.active {
+    color: #dc3545;  /* Red color for active state */
+    cursor: pointer;
+}
+.revert-btn.active:hover {
+    color: #bb2d3b;  /* Darker red on hover for active state */
+}
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+.delete-checkbox-cell {
+    width: 40px !important;
+    text-align: center;
+    padding: 0.5rem !important;
+}
+/* Ensure the danger background is visible even with striping */
+.table-danger,
+.table-danger > td,
+.table-danger > th {
+    background-color: #f8d7da !important;
+}
