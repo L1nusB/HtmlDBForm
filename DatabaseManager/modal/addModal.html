@@ -1,0 +1,65 @@
+<!-- Modal HTML structure for adding new entries -->
+<div class="modal fade" id="addEntriesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Entries</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Temporary entries table -->
+                <div id="tempEntriesContainer" class="mb-4 d-none">
+                    <h6>Entries to be added:</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Number</th>
+                                <th>Name</th>
+                                <th class="text-center">Process 1</th>
+                                <th class="text-center">Process 2</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tempEntriesBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Entry form -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="newEntryNumber" class="form-label">Number</label>
+                        <input type="text" class="form-control" id="newEntryNumber" required>
+                        <div class="invalid-feedback">Please enter a number.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="newEntryName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="newEntryName" required>
+                        <div class="invalid-feedback">Please enter a name.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="newEntryProcess1">
+                            <label class="form-check-label" for="newEntryProcess1">Process 1</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="newEntryProcess2">
+                            <label class="form-check-label" for="newEntryProcess2">Process 2</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button id="addToTempBtn" class="btn btn-primary">
+                            <i class="bi bi-plus-lg"></i> Add Entry
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="saveNewEntriesBtn">Save All Entries</button>
+            </div>
+        </div>
+    </div>
+</div>

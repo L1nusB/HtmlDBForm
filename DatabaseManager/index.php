@@ -34,7 +34,7 @@
                     </li>
                     <!-- Checkboxes will be populated dynamically -->
                 </ul>
-            <button id="deleteBtn" class="btn btn-danger me-2 rounded">
+            <button id="deleteBtn" class="btn btn-danger me-2 rounded disabled">
                 <i class="bi bi-trash"></i> Delete
             </button>
             <button id="confirmDeleteModeBtn" class="btn btn-danger me-2 rounded d-none">
@@ -43,22 +43,23 @@
             <button id="cancelDeleteBtn" class="btn btn-secondary me-2 rounded d-none">
                 <i class="bi bi-x-lg"></i> Cancel
             </button>
-            <button id="addEntriesBtn" class="btn btn-success me-2 rounded">
+            <button id="addEntriesBtn" class="btn btn-success me-2 rounded disabled">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
-            <button id="modifyBtn" class="btn btn-primary rounded">
+            <button id="modifyBtn" class="btn btn-primary me-2 rounded disabled">
                 <i class="bi bi-pencil"></i> Modify
             </button>
-            <button id="modifySaveBtn" class="btn btn-success rounded d-none">
+            <button id="modifySaveBtn" class="btn btn-success me-2 rounded d-none">
                 <i class="bi bi-check-lg"></i> Save
             </button>
-            <button id="modifyCancelBtn" class="btn btn-danger rounded d-none">
+            <button id="modifyCancelBtn" class="btn btn-danger me-2 rounded d-none">
                 <i class="bi bi-x-lg"></i> Cancel
             </button>
         </div>
         <table id="institutesTable" class="table table-striped">
             <thead>
                 <tr>
+                    <th class="delete-checkbox-cell d-none">#</th>
                     <th>RZBK</th>
                     <th>Name</th>
                     <!-- Dynamic process columns will be added here -->
@@ -68,6 +69,9 @@
                 <!-- Data will be populated by DataTables -->
             </tbody>
         </table>
+        <?php include './toast/toast.html'; ?>
+        <?php include './modal/confirmationModal.html'; ?>
+        <?php include './modal/addModal.html'; ?>
     </div>
 
     <!-- jQuery -->
@@ -78,7 +82,15 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
+    <script src="./js/utils.js"></script>
+    <script src="./js/toggleButtons.js"></script>
+    <script src="./js/addMode.js"></script>
+    <script src="./js/deleteMode.js"></script>
+    <script src="./js/editMode.js"></script>
+
     <script>
+        let table;
+        let data;
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
             $.ajax({
@@ -103,7 +115,7 @@
                     });
 
                     // Initialize DataTable with dynamic columns
-                    const table = $('#institutesTable').DataTable({
+                    table = $('#institutesTable').DataTable({
                         ajax: {
                             url: './db/get_data.php',
                             dataSrc: function(json) {
@@ -135,7 +147,18 @@
                                 });
                             }
                         },
-                        columns: [{
+                        columns: [
+                            {
+                                data: null,
+                                orderable: false,
+                                className: 'delete-checkbox-cell d-none',
+                                visible: false,
+                                render: function(data, type, row, meta) {
+                                    return '<input type="checkbox" class="delete-checkbox" data-row="' + meta.row + '">';
+                                },
+                                width: '40px'
+                            },
+                            {
                                 data: 'RZBK'
                             },
                             {
@@ -158,6 +181,7 @@
                             })),
                             {
                                 data: null,
+                                title: 'Revert',
                                 className: 'revert-cell d-none',
                                 orderable: false,
                                 visible: false,
@@ -166,7 +190,47 @@
                                 }
                             }
                         ],
+                        // order: [[1, 'asc']],
+                        // Do not allow ordering as it messes up in editing and deleting.
+                        ordering: false,
                     });
+                    // Enable the buttons after the table is initialized
+                    enableButtons();
+                    
+                    //// Handlers to enter different modes
+                    // Handle Modify button click to enter Edit mode
+                    $('#modifyBtn').click(enterEditMode);
+
+                    // Delete button click handler to enter Delete mode
+                    $('#deleteBtn').click(enterDeleteMode);
+
+                    // Add button click handler to enter Add mode
+                    $('#addEntriesBtn').click(enterAddMode);
+
+                    //// ----- Exit Deletion Mode ----- ////
+                    // Cancel delete button click handler
+                    $('#cancelDeleteBtn').click(exitDeleteMode);
+
+                    // Confirm delete button click handler
+                    $('#confirmDeleteModeBtn').click(function() {
+                        if (rowsToDelete.size === 0) {
+                            showToast("No rows selected for deletion", false);
+                            exitDeleteMode();
+                            return;
+                        }
+                        
+                        $('#confirmDeleteModal').modal('show');
+                    });
+                    //// Confirmation Modals Delete Mode ////
+                    // Final delete confirmation handler
+                    $('#finalConfirmDeleteBtn').click(processDeletion);
+
+                    // Delete checkbox change handler
+                    $('#institutesTable').on('change', '.delete-checkbox', toggleSelectedForDeletion);
+
+
+
+
                     // Initialize Bootstrap tooltips
                     $('[data-toggle="tooltip"]').tooltip();
                     
@@ -198,8 +262,6 @@
                 error: function(xhr, status, error) {
                     console.error('Error fetching data:', error);
                 },
-
-
             });
             
         });

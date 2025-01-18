@@ -21,6 +21,8 @@ try {
             ProduktionsStart
         FROM 
             USEAP_RPA_ViewProzessUebersicht
+        ORDER BY 
+            RZBK ASC
     ";
     $result = sqlsrv_query($conn, $query);
 
