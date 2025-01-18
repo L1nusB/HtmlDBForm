@@ -5,20 +5,20 @@ function enterAddMode() {
 	$("#addEntriesModal").modal("show");
 }
 
-// Function to reset the entry form
+// Function to reset the entry form on Cancel or Save (Exit Modal)
 function resetEntryForm() {
 	$("#newEntryNumber").val("").removeClass("is-invalid");
 	$("#newEntryName").val("").removeClass("is-invalid");
-    // Reset all checkboxes
-    document.querySelectorAll('.process-checkbox-new').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    // Reset all date inputs
-    document.querySelectorAll('.date-input-new').forEach(dateInput => {
-        dateInput.value = '';
-        dateInput.setAttribute('disabled', '');
-        dateInput.classList.remove('is-invalid');
-    });
+	// Reset all checkboxes
+	document.querySelectorAll(".process-checkbox-new").forEach((checkbox) => {
+		checkbox.checked = false;
+	});
+	// Reset all date inputs
+	document.querySelectorAll(".date-input-new").forEach((dateInput) => {
+		dateInput.value = "";
+		dateInput.setAttribute("disabled", "");
+		dateInput.classList.remove("is-invalid");
+	});
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});
@@ -42,19 +42,17 @@ function validateEntryForm() {
 		$("#newEntryName").removeClass("is-invalid");
 	}
 
-    // Check all checked checkboxes have valid dates
-    document.querySelectorAll('.process-checkbox-new:checked').forEach(checkbox => {
-        const process = checkbox.dataset.process;
-        const dateInput = document.querySelector(`#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}`);
-        console.log(process);
-        console.log("#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}");
-        if (!dateInput.value) {
-            dateInput.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            dateInput.classList.remove('is-invalid');
-        }
-    });
+	// Check all checked checkboxes have valid dates
+	document.querySelectorAll(".process-checkbox-new:checked").forEach((checkbox) => {
+		const process = checkbox.dataset.process;
+		const dateInput = document.querySelector(`#dateEntry${process.toLowerCase()}`);
+		if (!dateInput.value) {
+			dateInput.classList.add("is-invalid");
+			isValid = false;
+		} else {
+			dateInput.classList.remove("is-invalid");
+		}
+	});
 
 	return isValid;
 }
@@ -65,11 +63,14 @@ function updateTempEntriesTable() {
 	tbody.empty();
 
 	tempEntries.forEach((entry, index) => {
-		const processColumnsHTML = processColumns
+		console.log(entry);
+		const processColumnsHTML = processNames
 			.map(
 				(col) => `
             <td class="text-center">
-                <i class="bi ${entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
+                <i data-bs-toggle="tooltip" title="${entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] : ""}" class="bi ${
+					entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"
+				}"></i>
             </td>
         `
 			)
@@ -100,9 +101,19 @@ function addToTempEntries() {
 		name: $("#newEntryName").val().trim(),
 	};
 
+	dateFormatOptions = {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+	};
+
 	// Add process values dynamically
-	processColumns.forEach((col) => {
-		newEntry[col.toLowerCase()] = $(`#newEntry${col}`).prop("checked");
+	processNames.forEach((col) => {
+		newEntry[col.toLowerCase()] = $(`#newEntry${col.toLowerCase()}`).prop("checked");
+		newEntry[`${col.toLowerCase()}_date`] = (new Date($(`#dateEntry${col.toLowerCase()}`).val())).toLocaleDateString(
+			"de-DE",
+			dateFormatOptions
+		);
 	});
 
 	tempEntries.push(newEntry);
@@ -143,16 +154,19 @@ function saveAddedEntries() {
 }
 
 function handleProcessCheckboxChanges() {
-    // Handle checkbox changes
-    const process = this.dataset.process;
-    const dateInput = document.querySelector(`#dateEntry${process.charAt(0).toUpperCase() + process.slice(1)}`);
-    
-    if (this.checked) {
-        dateInput.removeAttribute('disabled');
-        dateInput.classList.add('required');
-    } else {
-        dateInput.setAttribute('disabled', '');
-        dateInput.classList.remove('required');
-        dateInput.classList.remove('is-invalid');
-    }
+	// Handle checkbox changes
+	const process = this.dataset.process;
+	const dateInput = document.querySelector(`#dateEntry${process.toLowerCase()}`);
+    console.log(process);
+    console.log(process.charAt(0).toUpperCase());
+    console.log(process.slice(1));
+    console.log(dateInput);
+	if (this.checked) {
+		dateInput.removeAttribute("disabled");
+		dateInput.classList.add("required");
+	} else {
+		dateInput.setAttribute("disabled", "");
+		dateInput.classList.remove("required");
+		dateInput.classList.remove("is-invalid");
+	}
 }

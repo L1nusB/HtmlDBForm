@@ -24,14 +24,14 @@ function generateAddModalEntryForm() {
                         <div class="form-check">
                             <input type="checkbox" 
                                 class="form-check-input process-checkbox-new" 
-                                id="newEntry${col}" 
+                                id="newEntry${col.toLowerCase()}" 
                                 data-process="${col.toLowerCase()}">
-                            <label class="form-check-label" for="newEntry${col}">${col}</label>
+                            <label class="form-check-label" for="newEntry${col.toLowerCase()}">${col}</label>
                         </div>
                         <input type="date" 
                             class="form-control date-input-new" 
                             style="width: 130px;"
-                            id="dateEntry${col}"
+                            id="dateEntry${col.toLowerCase()}"
                             data-process="${col.toLowerCase()}"
                             disabled 
                             required
