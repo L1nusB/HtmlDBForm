@@ -42,16 +42,19 @@ function exitDeleteMode() {
 function processDeletion() {
     const rowIndices = Array.from(rowsToDelete).sort((a, b) => b - a);
                         
-    // Remove the rows from the data array
-    rowIndices.forEach(index => {
-        data.splice(index, 1);
-    });
+    // Send to database
+	showToast(`Start deleting ${rowIndices.length} rows from the database`, "start", "info");
+
     
-    // Update the table
-    table.clear().rows.add(data).draw();
+
+    try {
+        // Show success message
+        showToast(`Successfully removed ${rowIndices.length} entries`, "finish", "success");
+    } catch (error) {
+        showToast("Failed to remove entries", "finish", "danger");
+        console.log(error);
+    }
     
-    // Show success message and exit delete mode
-    showToast(`Successfully deleted ${rowIndices.length} rows`, "finish", "success");
     $('#confirmDeleteModal').modal('hide');
     exitDeleteMode();
 }

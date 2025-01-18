@@ -142,19 +142,16 @@ function saveAddedEntries() {
 
     // Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
+
+    
+
     try {
         // Show success message
         showToast(`Successfully added ${tempEntries.length} new entries`, "finish", "success");
     } catch (error) {
         showToast("Failed to add entries", "finish", "danger");
+        console.log(error);
     }
-
-	// // Add all temporary entries to the main data array
-	// data.push(...tempEntries);
-
-	// // Refresh the DataTable
-	// table.clear().rows.add(data).draw();
-
 
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");

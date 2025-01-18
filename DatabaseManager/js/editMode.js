@@ -2,7 +2,6 @@ function enterEditMode() {
     $('#deleteBtn').prop('disabled', true); // Disable Delete button
     editMode = true;
     data = table.rows().data().toArray();
-    console.log(data);
     originalData = data;
     table.column(-1).visible(true, false);
     $('.revert-cell').removeClass('d-none');
