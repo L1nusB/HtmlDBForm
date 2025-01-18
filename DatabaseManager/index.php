@@ -179,13 +179,17 @@
                             },
                             ...processNames.map(process => ({
                                 data: process,
-                                render: function(data) {
+                                className: 'checkbox-cell',
+                                orderable: false,
+                                render: function(data, type, row, meta) {
                                     // Check the state of the toggle switch
                                     const showDates = $('#toggleDates').is(':checked');
 
                                     return `
                                         <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center h-100">
-                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled class="mb-1 mb-lg-0 mr-lg-2" 
+                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled 
+                                                class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
+                                                data-process="${process}" data-row="${meta.row}"
                                                 data-toggle="tooltip" title="${data.startDate ? data.startDate : ''}">
                                             ${showDates ? `<span>${data.startDate}</span>` : ''}
                                         </div>
@@ -213,18 +217,30 @@
                     // Populate the Add Modal with process names
                     popuplateAddModal();
                     
-                    //// Handlers to enter different modes
-                    // Handle Modify button click to enter Edit mode
-                    $('#modifyBtn').click(enterEditMode);
-                    // Handle Save button click
-                    $('#modifySaveBtn').click(handleSave);
-                
-                    // Handle Cancel button click
-                    $('#modifyCancelBtn').click(handleCancel);
-                    // Handle Modal Save confirmation 
-                    $('#modifyConfirmSave').click(confirmSave);
-                    // Handle Modal Cancel confirmation
-                    $('#modifyConfirmCancel').click(confirmCancel);
+                    //// ----- Edit Mode ----- ////
+                    {
+                        // Handle Modify button click to enter Edit mode
+                        $('#modifyBtn').click(enterEditMode);
+                        // Handle Save button click
+                        $('#modifySaveBtn').click(handleSave);
+                    
+                        // Handle Cancel button click
+                        $('#modifyCancelBtn').click(handleCancel);
+                        // Handle Modal Save confirmation 
+                        $('#modifyConfirmSave').click(confirmSave);
+                        // Handle Modal Cancel confirmation
+                        $('#modifyConfirmCancel').click(confirmCancel);
+                        // Handle checkbox changes (set checkbox state in data)
+                        $('#institutesTable').on('change', '.process-checkbox', function() {
+                            const checkbox = $(this);
+                            toggleCheckbox(checkbox);
+                        });
+                        // Handle revert button clicks
+                        $('#institutesTable').on('click', '.revert-btn', function() {
+                            const rowIndex = $(this).data('row');
+                            revertRow(rowIndex);
+                        });
+                    }
                     
                     //// ----- Add Mode/Modal ----- ////
                     {
