@@ -1,7 +1,3 @@
-let originalData = null;
-let modifiedRows = new Set();
-let editMode = false;
-
 function enterEditMode() {
     $('#deleteBtn').prop('disabled', true); // Disable Delete button
     editMode = true;
@@ -100,4 +96,42 @@ function updateModifiedState(rowIndex) {
         modifiedRows.delete(rowIndex);
     }
     updateRowHighlight();
+}
+
+function handleSave() {
+	if (modifiedRows.size > 0) {
+		$("#saveModal").modal("show");
+	} else {
+		finalizeSave();
+	}
+}
+
+function handleCancel() {
+	if (modifiedRows.size > 0) {
+		$("#cancelModal").modal("show");
+	} else {
+		data = JSON.parse(JSON.stringify(originalData));
+		table.clear().rows.add(data).draw(false);
+		// Re-enable checkboxes if still in edit mode
+		if (editMode) {
+			$(".process-checkbox").prop("disabled", false);
+		}
+		exitEditMode();
+	}
+}
+
+function confirmSave() {
+	$("#saveModal").modal("hide");
+	finalizeSave();
+}
+
+function confirmCancel() {
+	$("#cancelModal").modal("hide");
+	data = JSON.parse(JSON.stringify(originalData));
+	table.clear().rows.add(data).draw(false);
+	// Re-enable checkboxes if still in edit mode
+	if (editMode) {
+		$(".process-checkbox").prop("disabled", false);
+	}
+	exitEditMode();
 }

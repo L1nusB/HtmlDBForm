@@ -1,3 +1,4 @@
+<!-- browser-sync start --config DatabaseManager/browser-sync-config.js -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -91,6 +92,17 @@
     <script>
         let table;
         let data;
+        let processNames;
+
+        let originalData = null;
+        let modifiedRows = new Set();
+        let editMode = false;
+        // Add new deletion-related variables
+        let deleteMode = false;
+        let rowsToDelete = new Set();
+        // Temporary storage for new entries
+        let tempEntries = [];
+
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
             $.ajax({
@@ -99,7 +111,7 @@
                 dataType: 'json',
                 success: function(data) {
                     // Process data to create dynamic columns
-                    const processNames = [...new Set(data.map(item => item.Prozessname))];
+                    processNames = [...new Set(data.map(item => item.Prozessname))];
 
                     // Create header columns for processes
                     processNames.forEach(process => {
@@ -200,30 +212,57 @@
                     //// Handlers to enter different modes
                     // Handle Modify button click to enter Edit mode
                     $('#modifyBtn').click(enterEditMode);
+                    // Handle Save button click
+                    $('#modifySaveBtn').click(handleSave);
+                
+                    // Handle Cancel button click
+                    $('#modifyCancelBtn').click(handleCancel);
+                    // Handle Modal Save confirmation 
+                    $('#modifyConfirmSave').click(confirmSave);
+                    // Handle Modal Cancel confirmation
+                    $('#modifyConfirmCancel').click(confirmCancel);
+                    
+                    //// ----- Add Mode/Modal ----- ////
+                    {
+                        // Add button click handler to enter Add mode
+                        $('#addEntriesBtn').click(enterAddMode);
 
-                    // Delete button click handler to enter Delete mode
-                    $('#deleteBtn').click(enterDeleteMode);
-
-                    // Add button click handler to enter Add mode
-                    $('#addEntriesBtn').click(enterAddMode);
-
-                    //// ----- Exit Deletion Mode ----- ////
-                    // Cancel delete button click handler
-                    $('#cancelDeleteBtn').click(exitDeleteMode);
-
-                    // Confirm delete button click handler
-                    $('#confirmDeleteModeBtn').click(function() {
-                        if (rowsToDelete.size === 0) {
-                            showToast("No rows selected for deletion", false);
-                            exitDeleteMode();
-                            return;
-                        }
+                        // Handle Add Entry button click in Modal
+                        $('#addToTempBtn').click(addToTempEntries);
                         
-                        $('#confirmDeleteModal').modal('show');
-                    });
-                    //// Confirmation Modals Delete Mode ////
-                    // Final delete confirmation handler
-                    $('#finalConfirmDeleteBtn').click(processDeletion);
+                        // Handle remove temporary entry in Modal
+                        $('#tempEntriesBody').on('click', '.remove-temp-entry', removeTempEntries);
+                        
+                        // Handle Save All Entries button click to finalize adding entries
+                        $('#saveNewEntriesBtn').click(saveAddedEntries);
+                        
+                        // Handle modal hidden event
+                        $('#addEntriesModal').on('hidden.bs.modal', resetOnHidden);
+                    }
+                    
+                    //// ----- Deletion Mode ----- ////
+                    {
+                        // Delete button click handler to enter Delete mode
+                        $('#deleteBtn').click(enterDeleteMode);
+
+                        //// Exit Deletion Mode ////
+                        // Cancel delete button click handler
+                        $('#cancelDeleteBtn').click(exitDeleteMode);
+
+                        // Confirm delete button click handler
+                        $('#confirmDeleteModeBtn').click(function() {
+                            if (rowsToDelete.size === 0) {
+                                showToast("No rows selected for deletion", false);
+                                exitDeleteMode();
+                                return;
+                            }
+                            
+                            $('#confirmDeleteModal').modal('show');
+                        });
+                        //// Confirmation Modals Delete Mode ////
+                        // Final delete confirmation handler
+                        $('#finalConfirmDeleteBtn').click(processDeletion);
+                    }
 
                     // Delete checkbox change handler
                     $('#institutesTable').on('change', '.delete-checkbox', toggleSelectedForDeletion);

@@ -1,7 +1,3 @@
-// Add new deletion-related variables
-let deleteMode = false;
-let rowsToDelete = new Set();
-
 // Add functions for entering deletion mode
 function enterDeleteMode() {
     data = table.rows().data().toArray();
