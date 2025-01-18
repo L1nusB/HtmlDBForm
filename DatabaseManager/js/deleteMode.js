@@ -51,7 +51,7 @@ function processDeletion() {
     table.clear().rows.add(data).draw();
     
     // Show success message and exit delete mode
-    showToast(`Successfully deleted ${rowIndices.length} rows`, true);
+    showToast(`Successfully deleted ${rowIndices.length} rows`, "finish", "success");
     $('#confirmDeleteModal').modal('hide');
     exitDeleteMode();
 }

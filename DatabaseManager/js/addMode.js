@@ -1,5 +1,6 @@
 function enterAddMode() {
 	tempEntries = [];
+    data = table.rows().data().toArray();
 	resetEntryForm();
 	updateTempEntriesTable();
 	$("#addEntriesModal").modal("show");
@@ -7,7 +8,7 @@ function enterAddMode() {
 
 // Function to reset the entry form on Cancel or Save (Exit Modal)
 function resetEntryForm() {
-	$("#newEntryNumber").val("").removeClass("is-invalid");
+	$("#newEntryRZBK").val("").removeClass("is-invalid");
 	$("#newEntryName").val("").removeClass("is-invalid");
 	// Reset all checkboxes
 	document.querySelectorAll(".process-checkbox-new").forEach((checkbox) => {
@@ -28,11 +29,11 @@ function resetEntryForm() {
 function validateEntryForm() {
 	let isValid = true;
 
-	if (!$("#newEntryNumber").val().trim()) {
-		$("#newEntryNumber").addClass("is-invalid");
+	if (!$("#newEntryRZBK").val().trim()) {
+		$("#newEntryRZBK").addClass("is-invalid");
 		isValid = false;
 	} else {
-		$("#newEntryNumber").removeClass("is-invalid");
+		$("#newEntryRZBK").removeClass("is-invalid");
 	}
 
 	if (!$("#newEntryName").val().trim()) {
@@ -63,7 +64,6 @@ function updateTempEntriesTable() {
 	tbody.empty();
 
 	tempEntries.forEach((entry, index) => {
-		console.log(entry);
 		const processColumnsHTML = processNames
 			.map(
 				(col) => `
@@ -78,7 +78,7 @@ function updateTempEntriesTable() {
 
 		tbody.append(`
             <tr>
-                <td>${entry.number}</td>
+                <td>${entry.rzbk}</td>
                 <td>${entry.name}</td>
                 ${processColumnsHTML}
                 <td class="text-center">
@@ -97,7 +97,7 @@ function addToTempEntries() {
 	if (!validateEntryForm()) return;
 
 	const newEntry = {
-		number: $("#newEntryNumber").val().trim(),
+		rzbk: $("#newEntryRZBK").val().trim(),
 		name: $("#newEntryName").val().trim(),
 	};
 
@@ -135,18 +135,26 @@ function resetOnHidden() {
 
 function saveAddedEntries() {
 	if (tempEntries.length === 0) {
-		showToast("No entries to save", false);
+		showToast("No entries to save", "finished", "info");
+        $("#addEntriesModal").modal("hide");
 		return;
 	}
 
-	// Add all temporary entries to the main data array
-	data.push(...tempEntries);
+    // Send to database
+	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
+    try {
+        // Show success message
+        showToast(`Successfully added ${tempEntries.length} new entries`, "finish", "success");
+    } catch (error) {
+        showToast("Failed to add entries", "finish", "danger");
+    }
 
-	// Refresh the DataTable
-	table.clear().rows.add(data).draw();
+	// // Add all temporary entries to the main data array
+	// data.push(...tempEntries);
 
-	// Show success message
-	showToast(`Successfully added ${tempEntries.length} new entries`, true);
+	// // Refresh the DataTable
+	// table.clear().rows.add(data).draw();
+
 
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
@@ -157,10 +165,6 @@ function handleProcessCheckboxChanges() {
 	// Handle checkbox changes
 	const process = this.dataset.process;
 	const dateInput = document.querySelector(`#dateEntry${process.toLowerCase()}`);
-    console.log(process);
-    console.log(process.charAt(0).toUpperCase());
-    console.log(process.slice(1));
-    console.log(dateInput);
 	if (this.checked) {
 		dateInput.removeAttribute("disabled");
 		dateInput.classList.add("required");

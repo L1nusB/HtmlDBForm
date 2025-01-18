@@ -1,7 +1,31 @@
-function showToast(message, isSuccess = true) {
-    const toast = $('#saveToast');
-    toast.removeClass('text-bg-success text-bg-info');
-    toast.addClass(isSuccess ? 'text-bg-success' : 'text-bg-info');
+function showToast(message, type = "misc", result = "info") {
+    let toast;
+    switch (type) {
+        case "start":
+            toast = $('#startToast');
+            break;
+        case "finish":
+            toast = $('#finishToast');
+            break;
+        default:
+            toast = $('#miscToast');
+            break;
+    }
+    toast.removeClass('text-bg-success text-bg-info text-bg-danger text-bg-warning');
+    switch (result) {
+        case "success":
+            toast.addClass('text-bg-success');
+            break;
+        case "danger":
+            toast.addClass('text-bg-danger');
+            break;
+        case "warning":
+            toast.addClass('text-bg-warning');
+            break;
+        default:
+            toast.addClass('text-bg-info');
+            break;
+    }
     toast.find('.toast-body').text(message);
     
     const bsToast = new bootstrap.Toast(toast);

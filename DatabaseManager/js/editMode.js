@@ -75,7 +75,7 @@ function finalizeSave() {
         "Changes saved successfully!" : 
         "No changes were made";
     
-    showToast(message, hasChanges);
+    showToast(message, "finish", hasChanges ? "success" : "info");
     exitEditMode();
 }
 

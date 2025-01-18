@@ -9,28 +9,15 @@
             <div class="modal-body">
                 <!-- Temporary entries table -->
                 <div id="tempEntriesContainer" class="mb-4 d-none">
-                    <!-- <h6>Entries to be added:</h6>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Number</th>
-                                <th>Name</th>
-                                <th class="text-center">Process 1</th>
-                                <th class="text-center">Process 2</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tempEntriesBody">
-                        </tbody>
-                    </table> -->
+                    <!-- Will be populated dynamically in populateAddModal.js -->
                 </div>
                 
                 <!-- Entry form -->
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="newEntryNumber" class="form-label">Number</label>
-                        <input type="text" class="form-control" id="newEntryNumber" required>
-                        <div class="invalid-feedback">Please enter a number.</div>
+                        <label for="newEntryRZBK" class="form-label">RZBK</label>
+                        <input type="text" class="form-control" id="newEntryRZBK" required>
+                        <div class="invalid-feedback">Please enter a RZBK.</div>
                     </div>
                     <div class="col-md-6">
                         <label for="newEntryName" class="form-label">Name</label>
@@ -38,18 +25,7 @@
                         <div class="invalid-feedback">Please enter a name.</div>
                     </div>
                     <div id="addModalProcessSelector" class="col-12">
-                        <!-- <div class="col-md-6">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="newEntryProcess1">
-                                <label class="form-check-label" for="newEntryProcess1">Process 1</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="newEntryProcess2">
-                                <label class="form-check-label" for="newEntryProcess2">Process 2</label>
-                            </div>
-                        </div> -->
+                        <!-- Will be populated dynamically in populateAddModal.js -->
                     </div>
                     <div class="col-12">
                         <button id="addToTempBtn" class="btn btn-primary">

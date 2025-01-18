@@ -261,7 +261,7 @@
                         // Confirm delete button click handler
                         $('#confirmDeleteModeBtn').click(function() {
                             if (rowsToDelete.size === 0) {
-                                showToast("No rows selected for deletion", false);
+                                showToast("No rows selected for deletion", "finish", "info");
                                 exitDeleteMode();
                                 return;
                             }
