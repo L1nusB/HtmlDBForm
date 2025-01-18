@@ -55,7 +55,12 @@ function initializeTable() {
     });
 
     table = $('#dataTable').DataTable({
-        data: data,
+        // data: data,
+        // ajax: 'dataSource.json',
+        ajax: {
+            url: 'dataSource.json',
+            dataSrc: 'data',
+        },
         columns: columns,
         searching: true,
         ordering: true,
