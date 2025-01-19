@@ -63,6 +63,7 @@
                     <th class="delete-checkbox-cell d-none">#</th>
                     <th>RZBK</th>
                     <th>Name</th>
+                    <th>Standort</th>
                     <!-- Dynamic process columns will be added here -->
                 </tr>
             </thead>
@@ -90,6 +91,12 @@
     <script src="./js/editMode.js"></script>
     <script src="./js/populateAddModal.js"></script>
 
+    <!-- Embed PHP variables as JavaScript -->
+    <!-- Defines instituteMappingTest -->
+    <?php include './db/create_bankenmap.php';?>
+    <!-- Defines locationMapping and locationAssignment -->
+    <?php include './db/check_standort.php';?>
+
     <script>
         let table;
         let data;
@@ -103,6 +110,7 @@
         let rowsToDelete = new Set();
         // Temporary storage for new entries
         let tempEntries = [];
+
 
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
@@ -139,7 +147,8 @@
                                         groupedData[key] = {
                                             RZBK: item.RZBK,
                                             Name: item.Name,
-                                            processes: {}
+                                            processes: {},
+                                            Standort: locationAssignment[item.fk_RPA_Bankenuebersicht] || 'unknown'
                                         };
                                     }
                                     groupedData[key].processes[item.Prozessname] = item.ProduktionsStart || null;
@@ -148,7 +157,8 @@
                                 return Object.values(groupedData).map(row => {
                                     const newRow = {
                                         RZBK: row.RZBK,
-                                        Name: row.Name
+                                        Name: row.Name,
+                                        Standort: row.Standort,
                                     };
                                     processNames.forEach(process => {
                                         newRow[process] = {
@@ -163,6 +173,7 @@
                         columns: [
                             {
                                 data: null,
+                                title: '#',
                                 orderable: false,
                                 className: 'delete-checkbox-cell d-none',
                                 visible: false,
@@ -172,10 +183,17 @@
                                 width: '40px'
                             },
                             {
-                                data: 'RZBK'
+                                data: 'RZBK',
+                                title: 'RZBK'
                             },
                             {
-                                data: 'Name'
+                                data: 'Name',
+                                title: 'Name'
+                            },
+                            {
+                                data: 'Standort',
+                                title: 'Standort',
+                                orderable: false,
                             },
                             ...processNames.map(process => ({
                                 data: process,
@@ -305,11 +323,9 @@
                         //// Confirmation Modals Delete Mode ////
                         // Final delete confirmation handler
                         $('#finalConfirmDeleteBtn').click(processDeletion);
+                        // Delete checkbox change handler
+                        $('#institutesTable').on('change', '.delete-checkbox', toggleSelectedForDeletion);
                     }
-
-                    // Delete checkbox change handler
-                    $('#institutesTable').on('change', '.delete-checkbox', toggleSelectedForDeletion);
-
 
 
 
