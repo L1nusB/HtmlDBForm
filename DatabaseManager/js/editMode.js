@@ -5,6 +5,17 @@ function enterEditMode() {
     // Deep copy the data to originalData
 	originalData = JSON.parse(JSON.stringify(data));
 	table.column(-1).visible(true, false);
+
+	enableEditFields();
+	
+	// Clear modified rows and check initial state
+	modifiedRows.clear();
+	data.forEach((_, index) => {
+		updateModifiedState(index);
+	});
+}
+
+function enableEditFields() {
 	$(".revert-cell").removeClass("d-none");
 	table.draw(false);
 	$(".process-checkbox").prop("disabled", false);
@@ -12,12 +23,6 @@ function enterEditMode() {
 	$("#modifySaveBtn, #modifyBtn").addClass("d-none");
 	$("#modifySaveBtn, #modifyCancelBtn").removeClass("d-none");
 	$("#addEntriesBtn").prop("disabled", true); // Disable Add button
-
-	// Clear modified rows and check initial state
-	modifiedRows.clear();
-	data.forEach((_, index) => {
-		updateModifiedState(index);
-	});
 }
 
 function exitEditMode() {

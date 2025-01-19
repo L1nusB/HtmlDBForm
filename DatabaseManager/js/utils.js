@@ -82,3 +82,24 @@ function formatDateStringFromISO(dateString) {
     const formattedDate = `${day}.${month}.${year}`;
     return formattedDate;
 }
+
+function handlePageChange() {
+    if (deleteMode) {
+        // Ensure all checkboxes are shown on page change (requires reload once)
+        // After first reload, the checkboxes will be shown on page change regardless
+        // Use timeout because the initial <td> elements are not yet created
+        setTimeout(() => {
+        $('.delete-checkbox-cell').removeClass('d-none');
+        table.draw('page');
+        }, 20);
+    } else {
+        exitDeleteMode();
+    }
+	if (editMode) {
+        // Ensure all fields are editable
+        enableEditFields();
+    } else {
+        // Ensure all fields not editable when not in Edit Mode
+        exitEditMode();
+    }
+}
