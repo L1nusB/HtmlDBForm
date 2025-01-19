@@ -16,6 +16,18 @@ function enterDeleteMode() {
     table.draw(false);
 }
 
+function handlePageChange() {
+    // Ensure all checkboxes are shown on page change (requires reload once)
+    // After first reload, the checkboxes will be shown on page change regardless
+	if (deleteMode) {
+        // Use timeout because the initial <td> elements are not yet created
+        setTimeout(() => {
+        $('.delete-checkbox-cell').removeClass('d-none');
+        table.draw('page');
+        }, 20);
+	}
+}
+
 // Function for leaving deletion mode
 function exitDeleteMode() {
     deleteMode = false;

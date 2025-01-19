@@ -216,15 +216,18 @@
                                 }
                             }
                         ],
-                        // order: [[1, 'asc']],
+                        order: [[1, 'asc']],
                         // Do not allow ordering as it messes up in editing and deleting.
-                        ordering: false,
+                        // ordering: false,
                     });
                     // Enable the buttons after the table is initialized
                     enableButtons();
                     
                     // Populate the Add Modal with process names
                     popuplateAddModal();
+                    
+                    // Handle page change event (Make sure that all delete entries are shown)
+                    table.on('page', handlePageChange);
                     
                     //// ----- Edit Mode ----- ////
                     {

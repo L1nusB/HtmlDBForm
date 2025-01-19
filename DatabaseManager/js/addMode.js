@@ -143,7 +143,27 @@ function saveAddedEntries() {
     // Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
-    
+	console.log(tempEntries);
+	console.log(data);
+	tempEntries.forEach(entry => {
+		formattedEntry = {
+			RZBK: Number(entry.rzbk),
+			Name: entry.name,
+			...processNames.reduce((acc, str) => ({
+				...acc,
+				[str]: {
+					checked: entry[str.toLowerCase()],
+					startDate: entry[`${str.toLowerCase()}_date`]=="Invalid Date"?"": entry[`${str.toLowerCase()}_date`],
+				}
+			}), {})
+		};
+		data.push(formattedEntry);
+	});
+    // Add all temporary entries to the main data array
+	console.log(data);
+
+	// Refresh the DataTable
+	table.clear().rows.add(data).draw();
 
     try {
         // Show success message
