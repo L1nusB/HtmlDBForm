@@ -191,7 +191,16 @@
                                                 class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
                                                 data-process="${process}" data-row="${meta.row}"
                                                 data-toggle="tooltip" title="${data.startDate ? data.startDate : ''}">
-                                            ${showDates ? `<span>${data.startDate}</span>` : ''}
+                                            ${showDates ? 
+                                                data.startDate ? 
+                                                `<input type="date" style="width: 105px;" 
+                                                value="${formatDateStringToISO(data.startDate)}" 
+                                                class="form-control form-control-sm process-date-input" 
+                                                data-process="${process}" data-row="${meta.row}"
+                                                disabled
+                                                >` 
+                                                : '' 
+                                            : ''}
                                         </div>
                                     `;
                                 }
@@ -234,6 +243,10 @@
                         $('#institutesTable').on('change', '.process-checkbox', function() {
                             const checkbox = $(this);
                             toggleCheckbox(checkbox);
+                        });
+                        $('#institutesTable').on('change', '.process-date-input', function() {
+                            const dateInput = $(this);
+                            updateDateInput(dateInput);
                         });
                         // Handle revert button clicks
                         $('#institutesTable').on('click', '.revert-btn', function() {

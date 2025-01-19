@@ -61,3 +61,24 @@ function deepEqual(obj1, obj2) {
 
     return true;
 }
+
+function formatDateStringToISO(dateString) {
+    /* Convert a date string from dd.MM.yyyy to yyyy-MM-dd */
+
+    // Split the string into day, month, and year
+    const [day, month, year] = dateString.split('.');
+
+    // Convert to the new format yyyy-MM-dd
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+}
+function formatDateStringFromISO(dateString) {
+    /* Convert a date string from yyyy-MM-dd to dd.MM.yyyy*/
+
+    // Split the string into day, month, and year
+    const [year, month, day] = dateString.split('-');
+
+    // Convert to the new format yyyy-MM-dd
+    const formattedDate = `${day}.${month}.${year}`;
+    return formattedDate;
+}

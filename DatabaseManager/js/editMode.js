@@ -8,6 +8,7 @@ function enterEditMode() {
 	$(".revert-cell").removeClass("d-none");
 	table.draw(false);
 	$(".process-checkbox").prop("disabled", false);
+	$(".process-date-input").prop("disabled", false);
 	$("#modifySaveBtn, #modifyBtn").addClass("d-none");
 	$("#modifySaveBtn, #modifyCancelBtn").removeClass("d-none");
 	$("#addEntriesBtn").prop("disabled", true); // Disable Add button
@@ -23,6 +24,7 @@ function exitEditMode() {
 	$("#deleteBtn").prop("disabled", false); // Enable Delete button
 	editMode = false;
 	$(".process-checkbox").prop("disabled", true);
+	$(".process-date-input").prop("disabled", true);
 	$("#modifyBtn").removeClass("d-none");
 	$("#modifySaveBtn, #modifyCancelBtn").addClass("d-none");
 	$("#addEntriesBtn").prop("disabled", false); // Enable Add button
@@ -45,6 +47,7 @@ function revertRow(rowIndex) {
 		// Re-enable checkboxes after redraw
 		if (editMode) {
 			$(row.node()).find(".process-checkbox").prop("disabled", false);
+			$(row.node()).find(".process-date-input").prop("disabled", false);
 		}
 
 		updateRowHighlight();
@@ -95,6 +98,16 @@ function toggleCheckbox(checkbox) {
 		data[rowIndex][process]['checked'] = checkbox.prop("checked");
 		updateModifiedState(rowIndex);
 	}
+}
+
+function updateDateInput(dateInput) {
+    if (editMode) {
+        const rowIndex = dateInput.data("row");
+        const process = dateInput.data("process");
+        
+        data[rowIndex][process]['startDate'] = formatDateStringFromISO(dateInput.val());
+        updateModifiedState(rowIndex);
+    }
 }
 
 function updateModifiedState(rowIndex) {
