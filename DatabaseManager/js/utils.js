@@ -131,3 +131,27 @@ function handleOrderingChange() {
         toggleButtonsEdit(false);
 	}
 }
+
+// Binary search to find insertion point
+function insertSorted(arr, newElement, property = "RZBK") {
+    let left = 0;
+    let right = arr.length - 1;
+    
+    // Binary search to find insertion point
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (arr[mid][property] === newElement[property]) {
+            left = mid;
+            break;
+        }
+        if (arr[mid][property] < newElement[property]) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    // Insert at the found position
+    arr.splice(left, 0, newElement);
+    return arr;
+}

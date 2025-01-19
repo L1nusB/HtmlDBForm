@@ -143,8 +143,6 @@ function saveAddedEntries() {
     // Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
-	console.log(tempEntries);
-	console.log(data);
 	tempEntries.forEach(entry => {
 		formattedEntry = {
 			RZBK: Number(entry.rzbk),
@@ -157,10 +155,10 @@ function saveAddedEntries() {
 				}
 			}), {})
 		};
-		data.push(formattedEntry);
+		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
+		insertSorted(data, formattedEntry);
+		// data.push(formattedEntry);
 	});
-    // Add all temporary entries to the main data array
-	console.log(data);
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();

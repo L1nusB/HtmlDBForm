@@ -218,7 +218,7 @@
                         ],
                         order: [[1, 'asc']],
                         // Do not allow ordering as it messes up in editing and deleting.
-                        // ordering: false,
+                        ordering: false,
                     });
                     // Enable the buttons after the table is initialized
                     enableButtons();
@@ -229,7 +229,7 @@
                     // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     table.on('page', handlePageChange);
                     // Handle ordering change event (Make sure that all checkboxes/fields are shown and in the correct state)
-                    table.on('order', handleOrderingChange);
+                    // table.on('order', handleOrderingChange);
                     
                     //// ----- Edit Mode ----- ////
                     {
