@@ -226,8 +226,10 @@
                     // Populate the Add Modal with process names
                     popuplateAddModal();
                     
-                    // Handle page change event (Make sure that all delete entries are shown)
+                    // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     table.on('page', handlePageChange);
+                    // Handle ordering change event (Make sure that all checkboxes/fields are shown and in the correct state)
+                    table.on('order', handleOrderingChange);
                     
                     //// ----- Edit Mode ----- ////
                     {

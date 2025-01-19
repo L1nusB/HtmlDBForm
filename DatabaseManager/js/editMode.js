@@ -2,12 +2,13 @@ function enterEditMode() {
 	$("#deleteBtn").prop("disabled", true); // Disable Delete button
 	editMode = true;
 	data = table.rows().data().toArray();
-    // Deep copy the data to originalData
+	// Deep copy the data to originalData
 	originalData = JSON.parse(JSON.stringify(data));
 	table.column(-1).visible(true, false);
 
 	enableEditFields();
-	
+	table.draw(false);
+
 	// Clear modified rows and check initial state
 	modifiedRows.clear();
 	data.forEach((_, index) => {
@@ -17,27 +18,38 @@ function enterEditMode() {
 
 function enableEditFields() {
 	$(".revert-cell").removeClass("d-none");
-	table.draw(false);
 	$(".process-checkbox").prop("disabled", false);
 	$(".process-date-input").prop("disabled", false);
-	$("#modifySaveBtn, #modifyBtn").addClass("d-none");
-	$("#modifySaveBtn, #modifyCancelBtn").removeClass("d-none");
-	$("#addEntriesBtn").prop("disabled", true); // Disable Add button
+	toggleButtonsEdit(true);
+}
+
+function disableEditFields() {
+	$(".process-checkbox").prop("disabled", true);
+	$(".process-date-input").prop("disabled", true);
+	table.$(".revert-btn").removeClass("active");
+	$(".revert-cell").addClass("d-none");
+	table.$("tr").removeClass("modified-row");
 }
 
 function exitEditMode() {
 	$("#deleteBtn").prop("disabled", false); // Enable Delete button
 	editMode = false;
-	$(".process-checkbox").prop("disabled", true);
-	$(".process-date-input").prop("disabled", true);
-	$("#modifyBtn").removeClass("d-none");
-	$("#modifySaveBtn, #modifyCancelBtn").addClass("d-none");
-	$("#addEntriesBtn").prop("disabled", false); // Enable Add button
-	table.$(".revert-btn").removeClass("active");
+	disableEditFields();
+	toggleButtonsEdit(false);
 	table.column(-1).visible(false);
-	$(".revert-cell").addClass("d-none");
 	modifiedRows.clear();
-	table.$("tr").removeClass("modified-row");
+}
+
+function toggleButtonsEdit(deletionMode) {
+	if (deletionMode) {
+		$("#modifySaveBtn, #modifyBtn").addClass("d-none");
+		$("#modifySaveBtn, #modifyCancelBtn").removeClass("d-none");
+		$("#addEntriesBtn").prop("disabled", true); // Disable Add button
+	} else {
+		$("#modifyBtn").removeClass("d-none");
+		$("#modifySaveBtn, #modifyCancelBtn").addClass("d-none");
+		$("#addEntriesBtn").prop("disabled", false); // Enable Add button
+	}
 }
 
 function revertRow(rowIndex) {
@@ -86,11 +98,11 @@ function finalizeSave() {
 }
 
 function isRowModified(rowIndex) {
-    if (!originalData) return false;
-    
+	if (!originalData) return false;
+
 	const original = originalData[rowIndex];
 	const current = data[rowIndex];
-    
+
 	// Check if both are the same object reference (see utils.js)
 	return !deepEqual(original, current);
 }
@@ -99,20 +111,20 @@ function toggleCheckbox(checkbox) {
 	if (editMode) {
 		const rowIndex = checkbox.data("row");
 		const process = checkbox.data("process");
-        
-		data[rowIndex][process]['checked'] = checkbox.prop("checked");
+
+		data[rowIndex][process]["checked"] = checkbox.prop("checked");
 		updateModifiedState(rowIndex);
 	}
 }
 
 function updateDateInput(dateInput) {
-    if (editMode) {
-        const rowIndex = dateInput.data("row");
-        const process = dateInput.data("process");
-        
-        data[rowIndex][process]['startDate'] = formatDateStringFromISO(dateInput.val());
-        updateModifiedState(rowIndex);
-    }
+	if (editMode) {
+		const rowIndex = dateInput.data("row");
+		const process = dateInput.data("process");
+
+		data[rowIndex][process]["startDate"] = formatDateStringFromISO(dateInput.val());
+		updateModifiedState(rowIndex);
+	}
 }
 
 function updateModifiedState(rowIndex) {
@@ -137,12 +149,12 @@ function handleCancel() {
 		$("#cancelModal").modal("show");
 	} else {
 		data = JSON.parse(JSON.stringify(originalData));
-		table.clear().rows.add(data).draw(false);
 		// Re-enable checkboxes if still in edit mode
 		if (editMode) {
 			$(".process-checkbox").prop("disabled", false);
 		}
 		exitEditMode();
+		table.clear().rows.add(data).draw(false);
 	}
 }
 
