@@ -17,17 +17,26 @@ function enterEditMode() {
 }
 
 function enableEditFields() {
+	// Show revert and modify buttons 
 	$(".revert-cell").removeClass("d-none");
+	$(".edit-field-btn").removeClass("d-none");
+	$(".edit-field-btn").addClass("active");
+	// Enable checkboxes and date inputs
 	$(".process-checkbox").prop("disabled", false);
 	$(".process-date-input").prop("disabled", false);
 	toggleButtonsEdit(true);
 }
 
 function disableEditFields() {
+	// Disable checkboxes and date inputs
 	$(".process-checkbox").prop("disabled", true);
 	$(".process-date-input").prop("disabled", true);
+	// Hide revert and modify buttons
 	table.$(".revert-btn").removeClass("active");
 	$(".revert-cell").addClass("d-none");
+	// These are not strictly necessary but good practice (handeled in render function?)
+	table.$(".edit-field-btn").removeClass("active");
+	$(".edit-field-btn").addClass("d-none");
 	table.$("tr").removeClass("modified-row");
 }
 

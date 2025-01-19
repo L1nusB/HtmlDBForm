@@ -199,14 +199,14 @@
                             },
                             ...processNames.map(process => ({
                                 data: process,
-                                className: 'checkbox-cell',
+                                className: 'checkbox-cell text-center',
                                 orderable: false,
                                 render: function(data, type, row, meta) {
                                     // Check the state of the toggle switch
                                     const showDates = $('#toggleDates').is(':checked');
 
                                     return `
-                                        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center h-100">
+                                        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center gap-1">
                                             <input type="checkbox" ${data.checked ? 'checked' : ''} disabled 
                                                 class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
                                                 data-process="${process}" data-row="${meta.row}"
@@ -221,6 +221,7 @@
                                                 >` 
                                                 : '' 
                                             : ''}
+                                            <i class="bi bi-pencil edit-field-btn d-none" data-row="${meta.row}"></i>
                                         </div>
                                     `;
                                 }
@@ -277,6 +278,11 @@
                         $('#institutesTable').on('click', '.revert-btn', function() {
                             const rowIndex = $(this).data('row');
                             revertRow(rowIndex);
+                        });
+                        // Handle modify button clicks
+                        $('#institutesTable').on('click', '.edit-field-btn', function() {
+                            const rowIndex = $(this).data('row');
+                            // revertRow(rowIndex);
                         });
                     }
                     

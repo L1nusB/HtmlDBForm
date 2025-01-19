@@ -36,6 +36,16 @@ tr.modified-row:nth-of-type(even) > td {
 .revert-btn.active:hover {
     color: #bb2d3b;  /* Darker red on hover for active state */
 }
+.edit-field-btn {
+    color: #6c757d;  /* Default grey color */
+}
+.edit-field-btn.active {
+    cursor: pointer;
+}
+.edit-field-btn.active:hover::before {
+    content: "\F4C9";  /* Unicode for bi-pencil-fill */
+    color: #ffae00;  /* Darker orange on hover for active state */
+}
 .toast-container {
     position: fixed;
     top: 20px;

@@ -54,7 +54,6 @@ function generateAddModalEntryForm() {
 }
 
 function generateLocationSelector() {
-    console.log(locationMapping);
     return `<div id="locationSelector" class="row mt-3 align-items-center">
                 <div class="col-md-6 mb-3">
                     <label for="newEntryLocation" class="form-label">Standort</label>
