@@ -24,9 +24,11 @@
                     <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="processDropdown" id="processMenu">
-                    <div class="form-check form-switch d-flex justify-content-center">
-                        <input type="checkbox" role="switch" class="form-check-input" id="toggleDates" checked>
-                        <label class="form-check-label" for="toggleDates">Show Dates</label>
+                    <div class="d-flex justify-content-center">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" role="switch" class="form-check-input" id="toggleDates" checked>
+                            <label class="form-check-label" for="toggleDates">Show Dates</label>
+                        </div>
                     </div>
                     <!-- Title for the dropdown -->
                     <li class="dropdown-header text-center">

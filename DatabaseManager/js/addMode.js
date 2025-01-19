@@ -1,6 +1,6 @@
 function enterAddMode() {
 	tempEntries = [];
-    data = table.rows().data().toArray();
+	data = table.rows().data().toArray();
 	resetEntryForm();
 	updateTempEntriesTable();
 	$("#addEntriesModal").modal("show");
@@ -20,6 +20,14 @@ function resetEntryForm() {
 		dateInput.setAttribute("disabled", "");
 		dateInput.classList.remove("is-invalid");
 	});
+	// Reset all location selectors
+	document.querySelectorAll(".newEntryLocation").forEach((locationSelect) => {
+		locationSelect.value = "";
+		locationSelect.setAttribute("disabled", "");
+		locationSelect.classList.remove("is-invalid");
+	});
+	// The main location selector needs to be reeanbled
+	$("#newEntryLocation").prop("disabled", false);
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});
@@ -42,6 +50,12 @@ function validateEntryForm() {
 	} else {
 		$("#newEntryName").removeClass("is-invalid");
 	}
+	if (!$("#newEntryLocation").val()) {
+		$("#newEntryLocation").addClass("is-invalid");
+		isValid = false;
+	} else {
+		$("#newEntryLocation").removeClass("is-invalid");
+	}
 
 	// Check all checked checkboxes have valid dates
 	document.querySelectorAll(".process-checkbox-new:checked").forEach((checkbox) => {
@@ -52,6 +66,17 @@ function validateEntryForm() {
 			isValid = false;
 		} else {
 			dateInput.classList.remove("is-invalid");
+		}
+	});
+
+	// Check all active location selectors have a valid location
+	document.querySelectorAll(".newEntryLocation").forEach((locationSelect) => {
+		const disabled = locationSelect.disabled;
+		if (!disabled && !locationSelect.value) {
+			locationSelect.classList.add("is-invalid");
+			isValid = false;
+		} else {
+			locationSelect.classList.remove("is-invalid");
 		}
 	});
 
@@ -68,9 +93,9 @@ function updateTempEntriesTable() {
 			.map(
 				(col) => `
             <td class="text-center">
-                <i data-bs-toggle="tooltip" title="${entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] : ""}" class="bi ${
-					entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"
-				}"></i>
+                <i data-bs-toggle="tooltip" title="${
+									entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] : ""
+								}" class="bi ${entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
             </td>
         `
 			)
@@ -110,7 +135,7 @@ function addToTempEntries() {
 	// Add process values dynamically
 	processNames.forEach((col) => {
 		newEntry[col.toLowerCase()] = $(`#newEntry${col.toLowerCase()}`).prop("checked");
-		newEntry[`${col.toLowerCase()}_date`] = (new Date($(`#dateEntry${col.toLowerCase()}`).val())).toLocaleDateString(
+		newEntry[`${col.toLowerCase()}_date`] = new Date($(`#dateEntry${col.toLowerCase()}`).val()).toLocaleDateString(
 			"de-DE",
 			dateFormatOptions
 		);
@@ -136,24 +161,27 @@ function resetOnHidden() {
 function saveAddedEntries() {
 	if (tempEntries.length === 0) {
 		showToast("No entries to save", "finished", "info");
-        $("#addEntriesModal").modal("hide");
+		$("#addEntriesModal").modal("hide");
 		return;
 	}
 
-    // Send to database
+	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
-	tempEntries.forEach(entry => {
+	tempEntries.forEach((entry) => {
 		formattedEntry = {
 			RZBK: Number(entry.rzbk),
 			Name: entry.name,
-			...processNames.reduce((acc, str) => ({
-				...acc,
-				[str]: {
-					checked: entry[str.toLowerCase()],
-					startDate: entry[`${str.toLowerCase()}_date`]=="Invalid Date"?"": entry[`${str.toLowerCase()}_date`],
-				}
-			}), {})
+			...processNames.reduce(
+				(acc, str) => ({
+					...acc,
+					[str]: {
+						checked: entry[str.toLowerCase()],
+						startDate: entry[`${str.toLowerCase()}_date`] == "Invalid Date" ? "" : entry[`${str.toLowerCase()}_date`],
+					},
+				}),
+				{}
+			),
 		};
 		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
 		insertSorted(data, formattedEntry);
@@ -163,13 +191,13 @@ function saveAddedEntries() {
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();
 
-    try {
-        // Show success message
-        showToast(`Successfully added ${tempEntries.length} new entries`, "finish", "success");
-    } catch (error) {
-        showToast("Failed to add entries", "finish", "danger");
-        console.log(error);
-    }
+	try {
+		// Show success message
+		showToast(`Successfully added ${tempEntries.length} new entries`, "finish", "success");
+	} catch (error) {
+		showToast("Failed to add entries", "finish", "danger");
+		console.log(error);
+	}
 
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
@@ -180,12 +208,20 @@ function handleProcessCheckboxChanges() {
 	// Handle checkbox changes
 	const process = this.dataset.process;
 	const dateInput = document.querySelector(`#dateEntry${process.toLowerCase()}`);
+	const locationSelect = document.querySelector(`#newEntryLocation${process.toLowerCase()}`);
 	if (this.checked) {
 		dateInput.removeAttribute("disabled");
 		dateInput.classList.add("required");
+
+		locationSelect.removeAttribute("disabled");
+		locationSelect.classList.add("required");
 	} else {
 		dateInput.setAttribute("disabled", "");
 		dateInput.classList.remove("required");
 		dateInput.classList.remove("is-invalid");
+
+		locationSelect.setAttribute("disabled", "");
+		locationSelect.classList.remove("required");
+		locationSelect.classList.remove("is-invalid");
 	}
 }
