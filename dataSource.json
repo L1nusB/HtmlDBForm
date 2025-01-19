@@ -1,9 +1,0 @@
-{
-    "data": [
-            { "number": "A123", "name": "John Smith", "process1": true, "process2": false, "process3": true},
-            { "number": "B456", "name": "Jane Doe", "process1": false, "process2": true, "process3": false},
-            { "number": "C789", "name": "Bob Johnson", "process1": true, "process2": true, "process3": true, "process4": true},
-            { "number": "D012", "name": "Alice Brown", "process1": false, "process2": false, "process3": true },
-            { "number": "E345", "name": "Charlie Davis", "process1": true, "process2": false, "process3": true }
-        ]
-}
