@@ -248,8 +248,6 @@
                     
                     // Populate the Add Modal with process names
                     popuplateAddModal();
-                    // Populate the Edit Details Modal with process names
-                    populateEditDetailsModal()
                     
                     // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     table.on('page', handlePageChange);
