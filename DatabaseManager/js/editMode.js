@@ -17,7 +17,7 @@ function enterEditMode() {
 }
 
 function enableEditFields() {
-	// Show revert and modify buttons 
+	// Show revert and modify buttons
 	$(".revert-cell").removeClass("d-none");
 	$(".edit-field-btn").removeClass("d-none");
 	$(".edit-field-btn").addClass("active");
@@ -74,6 +74,10 @@ function revertRow(rowIndex) {
 		if (editMode) {
 			$(row.node()).find(".process-checkbox").prop("disabled", false);
 			$(row.node()).find(".process-date-input").prop("disabled", false);
+			// Need to re-enable and display the edit button due to redraw and custom render
+			// This could propably be done more elegantly but this works for now
+			$(row.node()).find(".edit-field-btn").removeClass("d-none");
+			$(row.node()).find(".edit-field-btn").addClass("active");
 		}
 
 		updateRowHighlight();

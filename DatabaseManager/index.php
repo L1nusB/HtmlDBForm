@@ -76,6 +76,7 @@
         <?php include './toast/toast.html'; ?>
         <?php include './modal/confirmationModal.html'; ?>
         <?php include './modal/addModal.html'; ?>
+        <?php include './modal/modifyDetailsModal.html'; ?>
     </div>
 
     <!-- jQuery -->
@@ -92,6 +93,7 @@
     <script src="./js/deleteMode.js"></script>
     <script src="./js/editMode.js"></script>
     <script src="./js/populateAddModal.js"></script>
+    <script src="./js/editDetailsModal.js"></script>
 
     <!-- Embed PHP variables as JavaScript -->
     <!-- Defines instituteMappingTest -->
@@ -221,7 +223,7 @@
                                                 >` 
                                                 : '' 
                                             : ''}
-                                            <i class="bi bi-pencil edit-field-btn d-none" data-row="${meta.row}"></i>
+                                            <i class="bi bi-pencil edit-field-btn d-none" data-process="${process}" data-row="${meta.row}"></i>
                                         </div>
                                     `;
                                 }
@@ -246,6 +248,8 @@
                     
                     // Populate the Add Modal with process names
                     popuplateAddModal();
+                    // Populate the Edit Details Modal with process names
+                    populateEditDetailsModal()
                     
                     // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     table.on('page', handlePageChange);
@@ -281,8 +285,8 @@
                         });
                         // Handle modify button clicks
                         $('#institutesTable').on('click', '.edit-field-btn', function() {
-                            const rowIndex = $(this).data('row');
-                            // revertRow(rowIndex);
+                            const modifyButton = $(this);
+                            modifyProcessDetails(modifyButton);
                         });
                     }
                     
