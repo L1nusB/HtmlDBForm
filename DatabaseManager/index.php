@@ -312,6 +312,8 @@
 
                         // Toggle dates on checkbox change
                         $('#toggleUniformLocation').change(toggleUniformLocation);
+                        // Toggle dates on checkbox change
+                        $('#newEntryLocationUniform').change(updateAllLocations);
                     }
                     
                     //// ----- Deletion Mode ----- ////

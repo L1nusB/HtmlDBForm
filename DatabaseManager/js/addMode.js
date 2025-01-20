@@ -88,7 +88,7 @@ function updateTempEntriesTable() {
 				(col) => `
             <td class="text-center">
                 <i data-bs-toggle="tooltip" title="${
-									entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] : ""
+									entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] + " ("+resolveLocation(entry[`${col.toLowerCase()}_location`])+")" : ""
 								}" class="bi ${entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
             </td>
         `
@@ -133,8 +133,8 @@ function addToTempEntries() {
 			"de-DE",
 			dateFormatOptions
 		);
+		newEntry[`${col.toLowerCase()}_location`] = $(`#newEntryLocation${col.toLowerCase()}`).val();
 	});
-
 	tempEntries.push(newEntry);
 	updateTempEntriesTable();
 	resetEntryForm();
@@ -221,6 +221,19 @@ function toggleUniformLocation() {
 				});
 			} else if (locationSelect.id === "newEntryLocationUniform") {
 				locationSelect.setAttribute("disabled", "");
+			}
+		});
+	}
+}
+
+function updateAllLocations() {
+	console.log("Chanb");
+	const curLocation = document.getElementById("newEntryLocationUniform").value;
+	const uniformLocation = $('#toggleUniformLocation').is(':checked');
+	if (uniformLocation) {
+		document.querySelectorAll(".newEntryLocation").forEach((locationSelect) => {
+			if (locationSelect.id !== "newEntryLocationUniform") {
+				locationSelect.value = curLocation;
 			}
 		});
 	}

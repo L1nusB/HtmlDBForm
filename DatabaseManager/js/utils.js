@@ -62,6 +62,11 @@ function deepEqual(obj1, obj2) {
 	return true;
 }
 
+function resolveLocation(locationId) {
+	// Resolve the location ID to the location name
+	return locationMapping[locationId];
+}
+
 function formatDateStringToISO(dateString) {
 	/* Convert a date string from dd.MM.yyyy to yyyy-MM-dd */
 
