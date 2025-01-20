@@ -62,6 +62,26 @@ function deepEqual(obj1, obj2) {
 	return true;
 }
 
+// Define a function to remove specified elements from an array
+function exclude(array, exclude) {
+    let excludeSet = new Set(exclude);
+    return array.filter(item => !excludeSet.has(item));
+}
+
+// Symmetric set difference between two arrays
+function difference(array1, array2) {
+    let set1 = new Set(array1);
+    let set2 = new Set(array2);
+
+    // Elements in array1 but not in array2
+    let uniqueToSet1 = array1.filter(item => !set2.has(item));
+    // Elements in array2 but not in array1
+    let uniqueToSet2 = array2.filter(item => !set1.has(item));
+
+    // Combine the unique elements from both sets
+    return [...uniqueToSet1, ...uniqueToSet2];
+}
+
 function resolveLocation(locationId) {
 	// Resolve the location ID to the location name
 	return locationMapping[locationId];

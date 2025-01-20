@@ -333,7 +333,9 @@
                         const selectedProcesses = $('#processMenu input[type="checkbox"]:checked').map(function() {
                             return $(this).val();
                         }).get(); // Get selected process names
-                        selectedProcesses.push('RZBK', 'Name'); // Always show RZBK and Name columns
+                        let nonProcessColumns = exclude(table.columns(':visible').titles().toArray(), processNames);
+                        console.log(nonProcessColumns);
+                        selectedProcesses.push(...nonProcessColumns); // Always show non process columns (that are visible)
 
                         // Loop through all columns and set visibility based on selection
                         const columns = table.columns().indexes(); // Get all column indexes
