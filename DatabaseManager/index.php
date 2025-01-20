@@ -88,6 +88,7 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
     <script src="./js/utils.js"></script>
+    <script src="./js/retrieveData.js"></script>
     <script src="./js/toggleButtons.js"></script>
     <script src="./js/addMode.js"></script>
     <script src="./js/deleteMode.js"></script>
@@ -114,6 +115,9 @@
         let rowsToDelete = new Set();
         // Temporary storage for new entries
         let tempEntries = [];
+
+        console.log(locationMapping);
+        console.log(locationAssignment);
 
 
         $(document).ready(function() {
@@ -143,36 +147,7 @@
                     table = $('#institutesTable').DataTable({
                         ajax: {
                             url: './db/get_data.php',
-                            dataSrc: function(json) {
-                                const groupedData = {};
-                                json.forEach(item => {
-                                    const key = `${item.RZBK}-${item.Name}`;
-                                    if (!groupedData[key]) {
-                                        groupedData[key] = {
-                                            RZBK: item.RZBK,
-                                            Name: item.Name,
-                                            processes: {},
-                                            Standort: locationAssignment[item.fk_RPA_Bankenuebersicht] || 'unknown'
-                                        };
-                                    }
-                                    groupedData[key].processes[item.Prozessname] = item.ProduktionsStart || null;
-                                });
-
-                                return Object.values(groupedData).map(row => {
-                                    const newRow = {
-                                        RZBK: row.RZBK,
-                                        Name: row.Name,
-                                        Standort: row.Standort,
-                                    };
-                                    processNames.forEach(process => {
-                                        newRow[process] = {
-                                            checked: row.processes[process] ? true : false,
-                                            startDate: row.processes[process] || ''
-                                        };
-                                    });
-                                    return newRow;
-                                });
-                            }
+                            dataSrc: prepareDatabaseData,
                         },
                         columns: [
                             {

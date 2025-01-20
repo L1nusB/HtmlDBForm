@@ -42,8 +42,8 @@ try {
         SELECT 
             fk_RPA_Bankenuebersicht,
             CASE 
-                WHEN unique_locations_count = 1 THEN 'Yes'
-                ELSE 'No'
+                WHEN unique_locations_count = 1 THEN Cast(1 As Bit)
+                ELSE Cast(0 As Bit)
             END as all_locations_same,
             CASE 
                 WHEN unique_locations_count = 1 THEN sample_location
