@@ -27,7 +27,7 @@ function resetEntryForm() {
 		locationSelect.classList.remove("is-invalid");
 	});
 	// The main location selector needs to be reeanbled
-	$("#newEntryLocation").prop("disabled", false);
+	$("#newEntryLocationUniform").prop("disabled", false);
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});
@@ -49,12 +49,6 @@ function validateEntryForm() {
 		isValid = false;
 	} else {
 		$("#newEntryName").removeClass("is-invalid");
-	}
-	if (!$("#newEntryLocation").val()) {
-		$("#newEntryLocation").addClass("is-invalid");
-		isValid = false;
-	} else {
-		$("#newEntryLocation").removeClass("is-invalid");
 	}
 
 	// Check all checked checkboxes have valid dates
@@ -204,7 +198,36 @@ function saveAddedEntries() {
 	tempEntries = [];
 }
 
+function toggleUniformLocation() {
+	const uniformLocation = $('#toggleUniformLocation').is(':checked');
+	if (uniformLocation) {
+		// Disable all location selectors except the main one
+		document.querySelectorAll(".newEntryLocation").forEach((locationSelect) => {
+			if (locationSelect.id !== "newEntryLocationUniform") {
+				locationSelect.setAttribute("disabled", "");
+			} else if (locationSelect.id === "newEntryLocationUniform") {
+				locationSelect.removeAttribute("disabled");
+			}
+		});
+	} else {
+		// Enable all location selectors except the main one
+		document.querySelectorAll(".newEntryLocation").forEach((locationSelect) => {
+			if (locationSelect.id !== "newEntryLocationUniform") {
+				// locationSelect.removeAttribute("disabled");
+				document.querySelectorAll(".process-checkbox-new:checked").forEach((checkbox) => {
+					const process = checkbox.dataset.process;
+					const locationSelect = document.querySelector(`#newEntryLocation${process.toLowerCase()}`);
+					locationSelect.removeAttribute("disabled");
+				});
+			} else if (locationSelect.id === "newEntryLocationUniform") {
+				locationSelect.setAttribute("disabled", "");
+			}
+		});
+	}
+}
+
 function handleProcessCheckboxChanges() {
+	const uniformLocation = $('#toggleUniformLocation').is(':checked');
 	// Handle checkbox changes
 	const process = this.dataset.process;
 	const dateInput = document.querySelector(`#dateEntry${process.toLowerCase()}`);
@@ -212,9 +235,10 @@ function handleProcessCheckboxChanges() {
 	if (this.checked) {
 		dateInput.removeAttribute("disabled");
 		dateInput.classList.add("required");
-
-		locationSelect.removeAttribute("disabled");
-		locationSelect.classList.add("required");
+		if (!uniformLocation) {
+			locationSelect.removeAttribute("disabled");
+			locationSelect.classList.add("required");
+		}
 	} else {
 		dateInput.setAttribute("disabled", "");
 		dateInput.classList.remove("required");

@@ -57,7 +57,7 @@ function generateLocationSelector() {
     return `<div id="locationSelector" class="row mt-3 align-items-center">
                 <div class="col-md-6 mb-3">
                     <label for="newEntryLocation" class="form-label">Standort</label>
-                    <select class="form-select newEntryLocation" id="newEntryLocation" required>
+                    <select class="form-select newEntryLocation" id="newEntryLocationUniform" required>
                         <option value="" selected disabled hidden>Wähle Standort</option>
                         ${Object.entries(locationMapping).map(([id,location]) => `<option value="${id}">${location}</option>`).join('')}
                     </select>

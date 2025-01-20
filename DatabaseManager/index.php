@@ -309,6 +309,9 @@
                         document.querySelectorAll('.process-checkbox-new').forEach(checkbox => {
                             checkbox.addEventListener('change', handleProcessCheckboxChanges);
                         });
+
+                        // Toggle dates on checkbox change
+                        $('#toggleUniformLocation').change(toggleUniformLocation);
                     }
                     
                     //// ----- Deletion Mode ----- ////
