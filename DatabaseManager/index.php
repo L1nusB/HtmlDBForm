@@ -116,10 +116,6 @@
         // Temporary storage for new entries
         let tempEntries = [];
 
-        console.log(locationMapping);
-        console.log(locationAssignment);
-
-
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
             $.ajax({
@@ -181,17 +177,19 @@
                                 render: function(data, type, row, meta) {
                                     // Check the state of the toggle switch
                                     const showDates = $('#toggleDates').is(':checked');
+                                    const date = data.startDate;
+                                    const enabled = data.checked;
 
                                     return `
                                         <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center gap-1">
-                                            <input type="checkbox" ${data.checked ? 'checked' : ''} disabled 
+                                            <input type="checkbox" ${enabled ? 'checked' : ''} disabled 
                                                 class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
                                                 data-process="${process}" data-row="${meta.row}"
-                                                data-toggle="tooltip" title="${data.startDate ? data.startDate : ''}">
+                                                data-toggle="tooltip" title="${date ? date : ''}">
                                             ${showDates ? 
-                                                data.startDate ? 
+                                                true ? 
                                                 `<input type="date" style="width: 105px;" 
-                                                value="${formatDateStringToISO(data.startDate)}" 
+                                                value="${formatDateStringToISO(date)}" 
                                                 class="form-control form-control-sm process-date-input" 
                                                 data-process="${process}" data-row="${meta.row}"
                                                 disabled
@@ -334,7 +332,6 @@
                             return $(this).val();
                         }).get(); // Get selected process names
                         let nonProcessColumns = exclude(table.columns(':visible').titles().toArray(), processNames);
-                        console.log(nonProcessColumns);
                         selectedProcesses.push(...nonProcessColumns); // Always show non process columns (that are visible)
 
                         // Loop through all columns and set visibility based on selection

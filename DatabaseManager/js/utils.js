@@ -88,16 +88,18 @@ function resolveLocation(locationId) {
 }
 
 function formatDateStringToISO(dateString) {
+	if (!dateString) return "";
 	/* Convert a date string from dd.MM.yyyy to yyyy-MM-dd */
-
+	
 	// Split the string into day, month, and year
 	const [day, month, year] = dateString.split(".");
-
+	
 	// Convert to the new format yyyy-MM-dd
 	const formattedDate = `${year}-${month}-${day}`;
 	return formattedDate;
 }
 function formatDateStringFromISO(dateString) {
+	if (!dateString) return "";
 	/* Convert a date string from yyyy-MM-dd to dd.MM.yyyy*/
 
 	// Split the string into day, month, and year

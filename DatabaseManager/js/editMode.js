@@ -42,6 +42,7 @@ function disableEditFields() {
 
 function exitEditMode() {
 	$("#deleteBtn").prop("disabled", false); // Enable Delete button
+	clearValidationErrors();
 	editMode = false;
 	disableEditFields();
 	toggleButtonsEdit(false);
@@ -149,8 +150,46 @@ function updateModifiedState(rowIndex) {
 	updateRowHighlight();
 }
 
+function clearValidationErrors() {
+	$('.process-date-input').removeClass('is-invalid');
+}
+
+function validate() {
+	clearValidationErrors();
+	let isValid = true;
+	modifiedRows.forEach((rowIndex) => {
+		// Check all checked checkboxes have valid dates
+		const rowNode = table.row(rowIndex).node();
+
+		// Find all div containers in this row that have a checked checkbox
+		const dateInputs = $(rowNode).find('div.d-flex').filter(function() {
+			// Find the checkbox within this div and check if it's checked
+			return $(this).find('.process-checkbox').prop('checked');
+		}).find('.process-date-input');
+
+		// Process each date input
+		dateInputs.each(function() {
+			const dateInput = $(this);
+			const dateValue = dateInput.val();
+			
+			// Check if the date is empty or invalid
+			if (!dateValue || dateValue.trim() === '') {
+				dateInput.addClass('is-invalid');
+				isValid = false;
+			} else {
+				dateInput.removeClass('is-invalid');
+			}
+		});
+	});
+	return isValid;
+}
+
 function handleSave() {
+	clearValidationErrors();
 	if (modifiedRows.size > 0) {
+		if (!validate()) {
+			return;
+		}
 		$("#saveModal").modal("show");
 	} else {
 		finalizeSave();
