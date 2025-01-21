@@ -108,7 +108,7 @@
         let processNames;
 
         let originalData = null;
-        let modifiedRows = new Set();
+        let modifiedRows = [];
         let editMode = false;
         // Add new deletion-related variables
         let deleteMode = false;
