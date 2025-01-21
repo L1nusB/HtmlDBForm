@@ -1,0 +1,35 @@
+<!-- Modal -->
+<div class="modal fade" id="processDetailsModal" tabindex="-1" 
+    aria-labelledby="processDetailsModalLabel" aria-hidden="true"
+    data-row="" data-process="">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="processDetailsModalLabel">Bearbeite Prozess Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="processDetailsModalForm">
+            <!-- Enabled/Disabled Checkbox -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="processDetailsModalEnabled">
+                <label class="form-check-label" for="processDetailsModalEnabled">Aktiv</label>
+            </div>
+            
+            <!-- Start Date -->
+            <div class="mb-3">
+                <label for="processDetailsModalStartDate" class="form-label">Bearbeitungsstart</label>
+                <input type="date" class="form-control" id="processDetailsModalStartDate">
+                <div class="invalid-feedback">
+                    Bitte wählen Sie ein Startdatum.
+                </div>
+            </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="saveProcessDetailsModal()">Save changes</button>
+        </div>
+        </div>
+    </div>
+</div>

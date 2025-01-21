@@ -1,5 +1,4 @@
 <?php
-/*
 header('Content-Type: application/json');
 
 // Enable error reporting for debugging
@@ -7,28 +6,25 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // data.php
-require_once 'db.php';
+require_once 'db_config.php';
 
 try {
-    echo 'Start';
     // Get database connection
     $conn = Database::getConnection();
 
     // Query to fetch data from the view
     $query = "
         SELECT 
-            b.RZBK, 
-            b.Name, 
-            p.Prozessname, 
-            z.ProduktionsStart
+            RZBK, 
+            Name, 
+            Prozessname, 
+            ProduktionsStart,
+            fk_RPA_Bankenuebersicht,
+            fk_RPA_Standort
         FROM 
-            USEAP_RPA_Bankenuebersicht b
-        LEFT JOIN 
-            USEAP_RPA_Prozess_Zuweisung z ON b.RZBK = z.RZBK
-        LEFT JOIN 
-            USEAP_RPA_Prozesse p ON z.ProzessID = p.ProzessID
+            USEAP_RPA_ViewProzessUebersicht
         ORDER BY 
-            b.RZBK, p.Prozessname
+            RZBK ASC
     ";
     $result = sqlsrv_query($conn, $query);
 
@@ -38,7 +34,6 @@ try {
 
     $data = array();
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-        // Convert date to ISO format for consistent handling
         $row['ProduktionsStart'] = $row['ProduktionsStart']->format('d.m.Y');
         $data[] = $row;
     }
@@ -55,31 +50,4 @@ try {
     // Close the connection
     Database::closeConnection();
 }
-*/
-// data.php
-include 'db.php';
-
-header('Content-Type: application/json');
-
-$query = "
-    SELECT 
-        RZBK, 
-        Name, 
-        Prozessname, 
-        ProduktionsStart
-    FROM 
-        USEAP_RPA_ViewProzessUebersicht
-";
-
-$result = sqlsrv_query($conn, $query);
-$data = [];
-
-if ($result) {
-    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-        $data[] = $row;
-    }
-}
-echo json_encode($data);
-// sqlsrv_free_stmt($result);
-sqlsrv_close($conn);
 ?>
