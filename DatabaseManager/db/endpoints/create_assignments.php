@@ -10,7 +10,10 @@ require_once '../assignment_operations.php';
 try {
     // Check if it's a POST request
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Only POST requests are allowed');
+        // If the request method is not POST, return an error
+        http_response_code(405); // Set HTTP status code to 405 Method Not Allowed
+        echo json_encode(array("status" => "error", 
+                                        "message" => "Method not allowed. Only POST requests are accepted."));
     }
 
     // Get JSON data from request body

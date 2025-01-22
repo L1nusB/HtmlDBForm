@@ -58,6 +58,7 @@ function prepareDatabaseData(json) {
             RZBK: row.RZBK,
             Name: row.Name,
             Standort: locationMapping[row.location] || 'unknown',
+            fk_Location: row.location,
             fk_Bankenuebersicht: row.bankId,
         };
 

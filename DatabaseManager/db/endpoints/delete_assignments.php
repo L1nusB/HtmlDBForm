@@ -8,24 +8,25 @@ ini_set('display_errors', 1);
 require_once '../assignment_operations.php';
 
 try {
-    // Check if it's a DELETE request
-    if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
-        throw new Exception('Only DELETE requests are allowed');
+    // Check if it's a POST request
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // If the request method is not POST, return an error
+        http_response_code(405); // Set HTTP status code to 405 Method Not Allowed
+        echo json_encode(array("status" => "error", 
+                                        "message" => "Method not allowed. Only POST requests are accepted."));
     }
+    $json = file_get_contents('php://input');
+    $data = json_decode($json);
 
-    // Get RZBK from URL parameter
-    $rzbk = $_GET['rzbk'] ?? null;
-    
-    if ($rzbk === null) {
-        throw new Exception('No RZBK provided');
+    if ($data === null) {
+        throw new Exception('Invalid JSON data provided');
     }
 
     // Delete the process using the operations class
-    $result = AssignmentOperations::deleteAssignment($rzbk);
-    
+    $result = AssignmentOperations::deleteAssignment($data);
+
     // Return success response
     echo json_encode($result);
-
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
@@ -33,4 +34,3 @@ try {
         'error' => $e->getMessage()
     ]);
 }
-?>
