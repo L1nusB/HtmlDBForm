@@ -1,7 +1,6 @@
-function deleteRecord(institute, location, testMode = false) {
+function deleteRecord(combinations, testMode = false) {
     const data = {
-        fk_RPA_Bankenuebersicht: institute,
-        fk_RPA_Standort: location
+        combinations: combinations // Array of objects
     };
 
     let url = './db/endpoints/delete_assignments.php'; // Base URL
@@ -19,8 +18,6 @@ function deleteRecord(institute, location, testMode = false) {
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            alert(data.message);
-            console.log("Rows affected: " + data.rowsAffected);
             showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
@@ -33,7 +30,6 @@ function deleteRecord(institute, location, testMode = false) {
                 showToast(`Problem during test deletion ${JSON.stringify(data)} entries`, "finish", "danger");
             }
         } else {
-            alert("Error: " + data.message);
             console.error(data.message);
             showToast("Failed to remove entries", "finish", "danger");
         }

@@ -51,21 +51,36 @@ class AssignmentOperations
             // Implementation for deleting assignment(s)
 
             // Validate required fields
-            $requiredFields = ['fk_RPA_Bankenuebersicht', 'fk_RPA_Standort'];
-            foreach ($requiredFields as $field) {
-                if (!isset($data->$field) || empty($data->$field)) {
-                    throw new Exception("Missing required field: $field");
+            if (!isset($data->combinations) || !is_array($data->combinations) || !count($data->combinations) > 0) {
+                throw new Exception("Missing or invalid combinations parameter.");
+            }
+            $combinations = $data->combinations;
+
+            // Build the IN clauses and parameters
+            $institutePlaceholders = [];
+            $locationPlaceholders = [];
+            $params = [];
+
+            foreach ($combinations as $combination) {
+                if (isset($combination->fk_RPA_Bankenuebersicht) && isset($combination->fk_RPA_Standort)) {
+                    $institutePlaceholders[] = '?';
+                    $locationPlaceholders[] = '?';
+                    $params[] = $combination->fk_RPA_Bankenuebersicht;
+                    $params[] = $combination->fk_RPA_Standort;
                 }
             }
 
-            $fk_RPA_Bankenuebersicht = $data->fk_RPA_Bankenuebersicht;
-            $fk_RPA_Standort = $data->fk_RPA_Standort;
-            $params = array($fk_RPA_Bankenuebersicht, $fk_RPA_Standort);
+            if (empty($institutePlaceholders)) {
+                throw new Exception("No valid combinations provided.");
+            }
+
+            $instituteInClause = implode(',', $institutePlaceholders);
+            $locationInClause = implode(',', $locationPlaceholders);
 
             // Check for the 'test' parameter
             if (isset($_GET['test']) && $_GET['test'] == 1) {
                 // Use SELECT COUNT(*) to simulate the delete
-                $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
+                $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE (fk_RPA_Bankenuebersicht IN ($instituteInClause)) AND (fk_RPA_Standort IN ($locationInClause))";
                 $countStmt = sqlsrv_query($conn, $countSql, $params);
                 if ($countStmt === false) {
                     $errors = sqlsrv_errors();
@@ -87,7 +102,7 @@ class AssignmentOperations
                 }
                 sqlsrv_free_stmt($countStmt);
             } else {
-                $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
+                $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE (fk_RPA_Bankenuebersicht IN ($instituteInClause)) AND (fk_RPA_Standort IN ($locationInClause))";
                 // Execute the query as usual
                 $stmt = sqlsrv_query($conn, $sql, $params);
                 if ($stmt === false) {

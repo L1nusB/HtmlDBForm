@@ -15,21 +15,21 @@ function enterDeleteMode() {
 }
 
 function toggleButtonsDelete(deletionMode) {
-    if (deletionMode) {
-        $("#deleteBtn").addClass("d-none");
-        $("#confirmDeleteModeBtn, #cancelDeleteBtn").removeClass("d-none");
-        $("#modifyBtn, #addEntriesBtn").prop("disabled", true);
-    } else {
-        $("#deleteBtn").removeClass("d-none");
-        $("#confirmDeleteModeBtn, #cancelDeleteBtn").addClass("d-none");
-        $("#modifyBtn, #addEntriesBtn").prop("disabled", false);
-    }
+	if (deletionMode) {
+		$("#deleteBtn").addClass("d-none");
+		$("#confirmDeleteModeBtn, #cancelDeleteBtn").removeClass("d-none");
+		$("#modifyBtn, #addEntriesBtn").prop("disabled", true);
+	} else {
+		$("#deleteBtn").removeClass("d-none");
+		$("#confirmDeleteModeBtn, #cancelDeleteBtn").addClass("d-none");
+		$("#modifyBtn, #addEntriesBtn").prop("disabled", false);
+	}
 }
 
 // Function for leaving deletion mode
 function exitDeleteMode(updateData = false) {
 	deleteMode = false;
-    disableFields();
+	disableFields();
 
 	rowsToDelete.clear();
 
@@ -66,16 +66,29 @@ function processDeletion() {
 	showToast(`Start deleting ${rowIndices.length} rows from the database`, "start", "info");
 
 	try {
-		
+		// Simple approach
+		// const combinationData = rowIndices.map(index => {
+		// 	return {
+		// 		fk_Bankenuebersicht: data[index].fk_Bankenuebersicht,
+		// 		fk_Location: data[index].fk_Location
+		// 	};
+		// });
+		// More complex approach but cleaner/safer
+		const combinationData = rowIndices
+			.map((index) =>
+				data[index] && typeof data[index] === "object"
+					? {
+							fk_RPA_Bankenuebersicht: data[index]?.fk_Bankenuebersicht,
+							fk_RPA_Standort: data[index]?.fk_Location,
+					  }
+					: null
+			)
+			.filter((combination) => combination !== null);
 		// Delete records from the database
-		rowIndices.forEach((index) => {
-			// deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location);
-			// Use test mode to check if the correct rows are deleted
-			deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location, true);
-		});
-		
+		deleteRecord(combinationData, true);
+
 		// Remove the rows from the data array (local)
-		rowIndices.forEach(index => {
+		rowIndices.forEach((index) => {
 			data.splice(index, 1);
 		});
 		// Update the table and redraw (is only temporary)
