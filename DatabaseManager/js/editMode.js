@@ -104,10 +104,17 @@ function updateRowHighlight() {
 }
 
 function finalizeSave() {
-	const hasChanges = Object.keys(modifiedRows).length > 0;
-	const message = hasChanges ? "Changes saved successfully!" : "No changes were made";
-
-	showToast(message, "finish", hasChanges ? "success" : "info");
+	const hasChanges = modifiedRows.size > 0;
+	if (hasChanges) {
+		const modifiedSummary = createModifiedSummary(data, originalData, processNames, modifiedRows);
+		const numModifications = Object.values(modifiedSummary).reduce((total, arr) => {
+									return total + (Array.isArray(arr) ? arr.length : 0);
+								}, 0);
+		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
+		// Send to database
+	} else {
+		showToast("No changes were made", "finish", "info");
+	}
 	exitEditMode();
 }
 
@@ -200,6 +207,69 @@ function validate() {
 		});
 	});
 	return isValid;
+}
+
+function createModifiedSummary(data, originalData, processNames, modifiedRows) {
+	const newProcesses = [];
+    const updatedProcesses = [];
+    const removedProcesses = [];
+
+    modifiedRows.forEach(rowIndex => {
+        const currentRow = data[rowIndex];
+        const originalRow = originalData[rowIndex];
+		const fk_RPA_Bankenuebersicht = currentRow.fk_Bankenuebersicht;
+
+        processNames.forEach(processName => {
+            const current = currentRow[processName];
+            const original = originalRow[processName];
+
+            // Skip if both are unchecked
+            if (!current.checked && !original.checked) {
+                return;
+            }
+
+            // Create info object with all properties except 'checked'
+            const processInfo = {
+                rowIndex,
+                processName,
+                ...Object.fromEntries(
+                    Object.entries(current).filter(([key]) => key !== 'checked')
+                )
+            };
+
+            if (!original.checked && current.checked) {
+                // New process
+                newProcesses.push({
+                    ...processInfo,
+                    checked: current.checked,
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+                });
+            } else if (original.checked && !current.checked) {
+                // Removed process
+                removedProcesses.push({
+                    ...processInfo,
+                    checked: current.checked,
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+                });
+            } else if (original.checked && current.checked) {
+                // If checked is true in both, directly compare the objects
+                if (!deepEqual(current, original)) {
+                    updatedProcesses.push({
+                        ...processInfo,
+                        checked: current.checked,
+                        previous: original,
+						fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+                    });
+                }
+            }
+        });
+    });
+
+    return {
+        new: newProcesses,
+        updated: updatedProcesses,
+        removed: removedProcesses
+    };
 }
 
 function handleSave() {

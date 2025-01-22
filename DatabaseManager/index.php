@@ -88,9 +88,13 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
     <script src="./js/utils.js"></script>
+    <script src="./js/dataOverview.js"></script>
     <script src="./js/retrieveData.js"></script>
     <script src="./js/toggleButtons.js"></script>
     <script src="./js/addMode.js"></script>
+
+
+    <script src="./js/DB/delete.js"></script>
     <script src="./js/deleteMode.js"></script>
     <script src="./js/editMode.js"></script>
     <script src="./js/populateAddModal.js"></script>
@@ -115,6 +119,8 @@
         let rowsToDelete = new Set();
         // Temporary storage for new entries
         let tempEntries = [];
+        // Interval for reloading the table
+        let reloadInterval;
 
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
@@ -144,6 +150,11 @@
                         ajax: {
                             url: './db/get_data.php',
                             dataSrc: prepareDatabaseData,
+                        },
+                        initComplete: function (settings, json) {
+                            data = table.rows().data().toArray();
+                            // Start auto-reload after initialization every 30 seconds
+                            // reloadInterval = startAutoReload(table, reloadInterval);
                         },
                         columns: [
                             {
@@ -295,13 +306,14 @@
                         $('#deleteBtn').click(enterDeleteMode);
 
                         //// Exit Deletion Mode ////
-                        // Cancel delete button click handler
+                        // Cancel delete button click handler (default für DB reload is false)
                         $('#cancelDeleteBtn').click(exitDeleteMode);
 
                         // Confirm delete button click handler
                         $('#confirmDeleteModeBtn').click(function() {
                             if (rowsToDelete.size === 0) {
                                 showToast("No rows selected for deletion", "finish", "info");
+                                // (default für DB reload is false)
                                 exitDeleteMode();
                                 return;
                             }

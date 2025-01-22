@@ -15,21 +15,21 @@ function enterDeleteMode() {
 }
 
 function toggleButtonsDelete(deletionMode) {
-    if (deletionMode) {
-        $("#deleteBtn").addClass("d-none");
-        $("#confirmDeleteModeBtn, #cancelDeleteBtn").removeClass("d-none");
-        $("#modifyBtn, #addEntriesBtn").prop("disabled", true);
-    } else {
-        $("#deleteBtn").removeClass("d-none");
-        $("#confirmDeleteModeBtn, #cancelDeleteBtn").addClass("d-none");
-        $("#modifyBtn, #addEntriesBtn").prop("disabled", false);
-    }
+	if (deletionMode) {
+		$("#deleteBtn").addClass("d-none");
+		$("#confirmDeleteModeBtn, #cancelDeleteBtn").removeClass("d-none");
+		$("#modifyBtn, #addEntriesBtn").prop("disabled", true);
+	} else {
+		$("#deleteBtn").removeClass("d-none");
+		$("#confirmDeleteModeBtn, #cancelDeleteBtn").addClass("d-none");
+		$("#modifyBtn, #addEntriesBtn").prop("disabled", false);
+	}
 }
 
 // Function for leaving deletion mode
-function exitDeleteMode() {
+function exitDeleteMode(updateData = false) {
 	deleteMode = false;
-    disableFields();
+	disableFields();
 
 	rowsToDelete.clear();
 
@@ -39,7 +39,13 @@ function exitDeleteMode() {
 	// Restore button states
 	toggleButtonsDelete(false);
 
-	table.draw(false);
+	// Check if the data should be updated to reduce database calls
+	if (updateData) {
+		// Reloads the table with the current data of the database
+		manualReload(table);
+	} else {
+		table.draw(false);
+	}
 }
 
 function disableFields() {
@@ -60,15 +66,44 @@ function processDeletion() {
 	showToast(`Start deleting ${rowIndices.length} rows from the database`, "start", "info");
 
 	try {
-		// Show success message
-		showToast(`Successfully removed ${rowIndices.length} entries`, "finish", "success");
+		// Simple approach
+		// const combinationData = rowIndices.map(index => {
+		// 	return {
+		// 		fk_Bankenuebersicht: data[index].fk_Bankenuebersicht,
+		// 		fk_Location: data[index].fk_Location
+		// 	};
+		// });
+		// More complex approach but cleaner/safer
+		const combinationData = rowIndices
+			.map((index) =>
+				data[index] && typeof data[index] === "object"
+					? {
+							fk_RPA_Bankenuebersicht: data[index]?.fk_Bankenuebersicht,
+							fk_RPA_Standort: data[index]?.fk_Location,
+					  }
+					: null
+			)
+			.filter((combination) => combination !== null);
+		// Delete records from the database
+		deleteRecord(combinationData, true);
+
+		// Remove the rows from the data array (local)
+		rowIndices.forEach((index) => {
+			data.splice(index, 1);
+		});
+		// Update the table and redraw (is only temporary)
+		// After database is finished the table is updated with new data anyways
+		table.clear().rows.add(data).draw();
+		// Toast message (sucess or failure) is displayed in the deleteRecord function
+		// as a promise
 	} catch (error) {
 		showToast("Failed to remove entries", "finish", "danger");
 		console.log(error);
 	}
 
 	$("#confirmDeleteModal").modal("hide");
-	exitDeleteMode();
+	// After handling deletion always refresh the data from the database
+	exitDeleteMode(true);
 }
 
 function toggleSelectedForDeletion() {
