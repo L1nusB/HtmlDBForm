@@ -88,6 +88,7 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
     <script src="./js/utils.js"></script>
+    <script src="./js/dataOverview.js"></script>
     <script src="./js/retrieveData.js"></script>
     <script src="./js/toggleButtons.js"></script>
     <script src="./js/addMode.js"></script>
@@ -305,13 +306,14 @@
                         $('#deleteBtn').click(enterDeleteMode);
 
                         //// Exit Deletion Mode ////
-                        // Cancel delete button click handler
+                        // Cancel delete button click handler (default für DB reload is false)
                         $('#cancelDeleteBtn').click(exitDeleteMode);
 
                         // Confirm delete button click handler
                         $('#confirmDeleteModeBtn').click(function() {
                             if (rowsToDelete.size === 0) {
                                 showToast("No rows selected for deletion", "finish", "info");
+                                // (default für DB reload is false)
                                 exitDeleteMode();
                                 return;
                             }

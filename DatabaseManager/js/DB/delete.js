@@ -1,7 +1,6 @@
-function deleteRecord(institute, process, location) {
+function deleteRecord(institute, location) {
     const data = {
         fk_RPA_Bankenuebersicht: institute,
-        fk_RPA_Process: process,
         fk_RPA_Standort: location
     };
 

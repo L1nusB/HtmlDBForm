@@ -27,7 +27,7 @@ function toggleButtonsDelete(deletionMode) {
 }
 
 // Function for leaving deletion mode
-function exitDeleteMode() {
+function exitDeleteMode(updateData = false) {
 	deleteMode = false;
     disableFields();
 
@@ -39,7 +39,13 @@ function exitDeleteMode() {
 	// Restore button states
 	toggleButtonsDelete(false);
 
-	table.draw(false);
+	// Check if the data should be updated to reduce database calls
+	if (updateData) {
+		// Reloads the table with the current data of the database
+		manualReload(table);
+	} else {
+		table.draw(false);
+	}
 }
 
 function disableFields() {
@@ -67,8 +73,18 @@ function processDeletion() {
 	});
 
 	try {
+		// Remove the rows from the data array (local)
+		rowIndices.forEach(index => {
+			data.splice(index, 1);
+		});
+		// Update the table and redraw (is only temporary)
+		// After database is finished the table is updated with new data anyways
+		table.clear().rows.add(data).draw();
+
 		// Delete records from the database
-		// deleteRecord();
+		rowIndices.forEach((index) => {
+			deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location);
+		});
 		// Show success message
 		showToast(`Successfully removed ${rowIndices.length} entries`, "finish", "success");
 	} catch (error) {
@@ -77,7 +93,8 @@ function processDeletion() {
 	}
 
 	$("#confirmDeleteModal").modal("hide");
-	exitDeleteMode();
+	// After handling deletion always refresh the data from the database
+	exitDeleteMode(true);
 }
 
 function toggleSelectedForDeletion() {

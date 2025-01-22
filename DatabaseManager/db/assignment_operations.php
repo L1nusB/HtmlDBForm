@@ -51,19 +51,18 @@ class AssignmentOperations
             // Implementation for deleting assignment(s)
 
             // Validate required fields
-            $requiredFields = ['fk_RPA_Bankenuebersicht', 'ProcessName', 'Location'];
+            $requiredFields = ['fk_RPA_Bankenuebersicht', 'fk_RPA_Standort'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || empty($data[$field])) {
+                if (!isset($data->$field) || empty($data->$field)) {
                     throw new Exception("Missing required field: $field");
                 }
             }
 
             $fk_RPA_Bankenuebersicht = $data->fk_RPA_Bankenuebersicht;
-            $fk_RPA_Process = $data->fk_RPA_Process;
             $fk_RPA_Standort = $data->fk_RPA_Standort;
 
-            $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Process = ? AND fk_RPA_Standort = ?";
-            $params = array($fk_RPA_Bankenuebersicht, $fk_RPA_Process, $fk_RPA_Standort);
+            $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
+            $params = array($fk_RPA_Bankenuebersicht, $fk_RPA_Standort);
 
             $stmt = sqlsrv_query($conn, $sql, $params);
 
