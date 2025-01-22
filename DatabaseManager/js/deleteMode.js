@@ -65,14 +65,15 @@ function processDeletion() {
 	// Send to database
 	showToast(`Start deleting ${rowIndices.length} rows from the database`, "start", "info");
 
-	// Log the data of the rows to be deleted
-	rowIndices.forEach((index) => {
-		console.log(data[index]);
-		console.log('Bankenuebersicht', data[index].fk_Bankenuebersicht);
-		console.log('Standort', data[index].fk_Location);
-	});
-
 	try {
+		
+		// Delete records from the database
+		rowIndices.forEach((index) => {
+			// deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location);
+			// Use test mode to check if the correct rows are deleted
+			deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location, true);
+		});
+		
 		// Remove the rows from the data array (local)
 		rowIndices.forEach(index => {
 			data.splice(index, 1);
@@ -80,13 +81,8 @@ function processDeletion() {
 		// Update the table and redraw (is only temporary)
 		// After database is finished the table is updated with new data anyways
 		table.clear().rows.add(data).draw();
-
-		// Delete records from the database
-		rowIndices.forEach((index) => {
-			deleteRecord(data[index].fk_Bankenuebersicht, data[index].fk_Location);
-		});
-		// Show success message
-		showToast(`Successfully removed ${rowIndices.length} entries`, "finish", "success");
+		// Toast message (sucess or failure) is displayed in the deleteRecord function
+		// as a promise
 	} catch (error) {
 		showToast("Failed to remove entries", "finish", "danger");
 		console.log(error);

@@ -60,32 +60,56 @@ class AssignmentOperations
 
             $fk_RPA_Bankenuebersicht = $data->fk_RPA_Bankenuebersicht;
             $fk_RPA_Standort = $data->fk_RPA_Standort;
-
-            $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
             $params = array($fk_RPA_Bankenuebersicht, $fk_RPA_Standort);
 
-            $stmt = sqlsrv_query($conn, $sql, $params);
-
-            if ($stmt === false) {
-                $errors = sqlsrv_errors();
-                $error_message = "Error deleting record: ";
-                foreach ($errors as $error) {
-                    $error_message .= $error['message'] . " ";
+            // Check for the 'test' parameter
+            if (isset($_GET['test']) && $_GET['test'] == 1) {
+                // Use SELECT COUNT(*) to simulate the delete
+                $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
+                $countStmt = sqlsrv_query($conn, $countSql, $params);
+                if ($countStmt === false) {
+                    $errors = sqlsrv_errors();
+                    $error_message = "Error getting count: ";
+                    foreach ($errors as $error) {
+                        $error_message .= $error['message'] . " ";
+                    }
+                    $result = array(
+                        "status" => "error",
+                        "message" => $error_message
+                    );
+                } else {
+                    $row = sqlsrv_fetch_array($countStmt, SQLSRV_FETCH_ASSOC);
+                    $count = $row['count'];
+                    $result = array(
+                        "status" => "test",
+                        "count" => $count
+                    );
                 }
-                $result =  array(
-                    "status" => "error",
-                    "message" => $error_message
-                );
+                sqlsrv_free_stmt($countStmt);
             } else {
-                $rowsAffected = sqlsrv_rows_affected($stmt);
-                $result = array(
-                    "status" => "success",
-                    "message" => "Record(s) deleted successfully.",
-                    "rowsAffected" => $rowsAffected
-                );
+                $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?";
+                // Execute the query as usual
+                $stmt = sqlsrv_query($conn, $sql, $params);
+                if ($stmt === false) {
+                    $errors = sqlsrv_errors();
+                    $error_message = "Error deleting record: ";
+                    foreach ($errors as $error) {
+                        $error_message .= $error['message'] . " ";
+                    }
+                    $result =  array(
+                        "status" => "error",
+                        "message" => $error_message
+                    );
+                } else {
+                    $rowsAffected = sqlsrv_rows_affected($stmt);
+                    $result = array(
+                        "status" => "success",
+                        "message" => "Record(s) deleted successfully.",
+                        "rowsAffected" => $rowsAffected
+                    );
+                }
+                sqlsrv_free_stmt($stmt);
             }
-            sqlsrv_free_stmt($stmt);
-
             // Return success/failure
             return $result;
         } catch (Exception $e) {
