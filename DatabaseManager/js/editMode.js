@@ -110,8 +110,8 @@ function finalizeSave() {
 		const numModifications = Object.values(modifiedSummary).reduce((total, arr) => {
 									return total + (Array.isArray(arr) ? arr.length : 0);
 								}, 0);
-
 		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
+		// Send to database
 	} else {
 		showToast("No changes were made", "finish", "info");
 	}
@@ -199,6 +199,7 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
     modifiedRows.forEach(rowIndex => {
         const currentRow = data[rowIndex];
         const originalRow = originalData[rowIndex];
+		const fk_RPA_Bankenuebersicht = currentRow.fk_Bankenuebersicht;
 
         processNames.forEach(processName => {
             const current = currentRow[processName];
@@ -222,13 +223,15 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                 // New process
                 newProcesses.push({
                     ...processInfo,
-                    checked: current.checked
+                    checked: current.checked,
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                 });
             } else if (original.checked && !current.checked) {
                 // Removed process
                 removedProcesses.push({
                     ...processInfo,
-                    checked: current.checked
+                    checked: current.checked,
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                 });
             } else if (original.checked && current.checked) {
                 // If checked is true in both, directly compare the objects
@@ -236,7 +239,8 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                     updatedProcesses.push({
                         ...processInfo,
                         checked: current.checked,
-                        previous: original
+                        previous: original,
+						fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                     });
                 }
             }

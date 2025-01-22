@@ -145,6 +145,9 @@
                             url: './db/get_data.php',
                             dataSrc: prepareDatabaseData,
                         },
+                        initComplete: function (settings, json) {
+                            data = table.rows().data().toArray();
+                        },
                         columns: [
                             {
                                 data: null,
