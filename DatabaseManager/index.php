@@ -115,6 +115,8 @@
         let rowsToDelete = new Set();
         // Temporary storage for new entries
         let tempEntries = [];
+        // Interval for reloading the table
+        let reloadInterval;
 
         $(document).ready(function() {
             // First, fetch the data to create dynamic columns
@@ -147,6 +149,8 @@
                         },
                         initComplete: function (settings, json) {
                             data = table.rows().data().toArray();
+                            // Start auto-reload after initialization every 30 seconds
+                            // reloadInterval = startAutoReload(table, reloadInterval);
                         },
                         columns: [
                             {
