@@ -1,4 +1,4 @@
-function deleteRecord(combinations, testMode = false) {
+function deleteAssignmentRecord(combinations, testMode = false) {
     const data = {
         combinations: combinations // Array of objects
     };
@@ -19,11 +19,13 @@ function deleteRecord(combinations, testMode = false) {
     .then(data => {
         if (data.status === "success") {
             showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
+        } else if (data.status === "warning") {
+            showToast(`Not all entries were removed. Only removed ${data.rowsAffected} entries.`, "finish", "warning");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
-                alert("Test Mode: Would delete " + data.count + " record(s).");
-                console.log("Would delete: " + data.count);
-                showToast(`Successfully removed ${data.count} entries`, "finish", "success");
+                alert("Test Mode: Would delete " + data.rowsAffected + " record(s).");
+                console.log("Would delete: " + data.rowsAffected);
+                showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
             } else {
                 console.log("Test data:", data); // Log the full test data for debugging
                 alert("Test Mode: " + JSON.stringify(data));
@@ -31,7 +33,7 @@ function deleteRecord(combinations, testMode = false) {
             }
         } else {
             console.error(JSON.stringify(data));
-            showToast(`Failed to remove entries ${JSON.stringify(data)}`, "finish", "danger");
+            showToast(`Failed to remove entries ${data.message}`, "finish", "danger");
         }
     })
     .catch(error => {

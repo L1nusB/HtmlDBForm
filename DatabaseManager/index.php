@@ -97,10 +97,11 @@
     <script src="./js/retrieveData.js"></script>
     <script src="./js/toggleButtons.js"></script>
     <script src="./js/DB/createAssignment.js"></script>
+    <script src="./js/DB/deleteAssignment.js"></script>
+    <script src="./js/DB/updateAssignment.js"></script>
+    
+    
     <script src="./js/addMode.js"></script>
-
-
-    <script src="./js/DB/delete.js"></script>
     <script src="./js/deleteMode.js"></script>
     <script src="./js/editMode.js"></script>
     <script src="./js/populateAddModal.js"></script>

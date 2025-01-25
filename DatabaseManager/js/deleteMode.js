@@ -85,8 +85,8 @@ function processDeletion() {
 			)
 			.filter((combination) => combination !== null);
 		// Delete records from the database
-		deleteRecord(combinationData);
-		// deleteRecord(combinationData, true);
+		deleteAssignmentRecord(combinationData);
+		// deleteAssignmentRecord(combinationData, true);
 
 		// Remove the rows from the data array (local)
 		rowIndices.forEach((index) => {
@@ -95,7 +95,7 @@ function processDeletion() {
 		// Update the table and redraw (is only temporary)
 		// After database is finished the table is updated with new data anyways
 		table.clear().rows.add(data).draw();
-		// Toast message (sucess or failure) is displayed in the deleteRecord function
+		// Toast message (sucess or failure) is displayed in the deleteAssignmentRecord function
 		// as a promise
 	} catch (error) {
 		showToast("Failed to remove entries", "finish", "danger");
