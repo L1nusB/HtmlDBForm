@@ -17,7 +17,9 @@ function prepareDatabaseData(json) {
         
         // Only add processes that match the location
         if (item.fk_RPA_Standort === groupedData[compositeKey].location) {
-            groupedData[compositeKey].processes[item.Prozessname] = item.ProduktionsStart || null;
+            groupedData[compositeKey].processes[item.Prozessname] = {startDate : item.ProduktionsStart || null,
+                                                                    fk_Prozess_ID : item.fk_RPA_Prozesse
+            };
         }
     });
 
@@ -35,7 +37,8 @@ function prepareDatabaseData(json) {
         processNames.forEach(process => {
             newRow[process] = {
                 checked: row.processes[process] ? true : false,
-                startDate: row.processes[process] || ''
+                startDate: row.processes[process] ? row.processes[process]['startDate'] : '',
+                processID: row.processes[process] ? row.processes[process]['fk_Prozess_ID'] : null,
             };
         });
 

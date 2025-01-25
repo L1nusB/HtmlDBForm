@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: application/json');
-
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -13,20 +11,7 @@ try {
     $conn = Database::getConnection();
 
     // Query to fetch data from the view
-    $query = "
-        SELECT 
-            RZBK, 
-            Name, 
-            Prozessname, 
-            ProduktionsStart,
-            fk_RPA_Bankenuebersicht,
-            fk_RPA_Standort,
-            fk_RPA_Prozesse
-        FROM 
-            USEAP_RPA_ViewProzessUebersicht
-        ORDER BY 
-            RZBK ASC
-    ";
+    $query = "SELECT pk_RPA_Prozesse, Prozessname FROM USEAP_RPA_Prozesse";
     $result = sqlsrv_query($conn, $query);
 
     if (!$result) {
@@ -34,14 +19,19 @@ try {
     }
 
     $data = array();
+    $prozessnameSet = array();
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-        $row['ProduktionsStart'] = $row['ProduktionsStart']->format('d.m.Y');
-        $data[] = $row;
+        $data[$row['pk_RPA_Prozesse']] = $row['Prozessname'];
+        $prozessnameSet[] = $row['Prozessname'];
     }
 
-    echo json_encode($data);
     sqlsrv_free_stmt($result);
 
+    // Pass the mapping and set to JavaScript
+    echo "<script>
+            const processMapping = " . json_encode($data) . ";
+            const processNames = " . json_encode(array_values(array_unique($prozessnameSet))) . ";
+        </script>";
 } catch (Exception $e) {
     http_response_code(500);
     echo 'Fehler';
@@ -51,4 +41,3 @@ try {
     // Close the connection
     Database::closeConnection();
 }
-?>

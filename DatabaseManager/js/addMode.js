@@ -1,6 +1,7 @@
 function enterAddMode() {
 	tempEntries = [];
 	data = table.rows().data().toArray();
+	console.log(data);
 	resetEntryForm();
 	updateTempEntriesTable();
 	$("#addEntriesModal").modal("show");
@@ -185,6 +186,7 @@ function saveAddedEntries() {
 	const combinations = [];
 
 	tempEntries.forEach((entry) => {
+		console.log(entry);
 		// Check if entry already exists and update it otherwise add it
 		const existingEntryIndex = data.findIndex(
 			(item) => item.fk_Bankenuebersicht === entry.fk_RPA_Bankenuebersicht && item.fk_Location === entry.location
@@ -237,6 +239,7 @@ function saveAddedEntries() {
 	});
 
 	// Send combinations to the server
+	// createAssignmentRecord(combinations);
 	createAssignmentRecord(combinations, true);
 	console.log(data);
 

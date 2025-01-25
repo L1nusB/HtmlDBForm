@@ -31,8 +31,8 @@ function createAssignmentRecord(combinations, testMode = false) {
                 showToast(`Problem during test creation ${JSON.stringify(data)}`, "finish", "danger");
             }
         } else {
-            console.error(data.message);
-            showToast("Failed to create entries", "finish", "danger");
+            console.error(JSON.stringify(data));
+            showToast(`Failed to create entries ${JSON.stringify(data)}`, "finish", "danger");
         }
     })
     .catch(error => {

@@ -111,11 +111,14 @@
     <?php include './db/create_bankenmap.php'; ?>
     <!-- Defines locationMapping and locationAssignment -->
     <?php include './db/check_standort.php'; ?>
+    <!-- Defines processMapping and processNames -->
+    <?php include './db/get_processes.php'; ?>
 
     <script>
+        console.log(processMapping, processNames);
         let table;
         let data;
-        let processNames;
+        // let processNames;
 
         let originalData = null;
         let modifiedRows = new Set();
@@ -136,7 +139,7 @@
                 dataType: 'json',
                 success: function(data) {
                     // Process data to create dynamic columns
-                    processNames = [...new Set(data.map(item => item.Prozessname))];
+                    // processNames = [...new Set(data.map(item => item.Prozessname))];
 
                     // Create header columns for processes
                     processNames.forEach(process => {
