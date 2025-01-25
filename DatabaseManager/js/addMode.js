@@ -1,6 +1,7 @@
 function enterAddMode() {
 	tempEntries = [];
 	data = table.rows().data().toArray();
+	console.log(data);
 	resetEntryForm();
 	updateTempEntriesTable();
 	$("#addEntriesModal").modal("show");
@@ -8,8 +9,10 @@ function enterAddMode() {
 
 // Function to reset the entry form on Cancel or Save (Exit Modal)
 function resetEntryForm() {
-	$("#newEntryRZBK").val("").removeClass("is-invalid");
-	$("#newEntryName").val("").removeClass("is-invalid");
+	$("#newEntryRZBK").val("");
+	$("#newEntryName").val("");
+	// Trigger change to update Select2
+	$("#newEntryInstitute").val("").trigger('change').removeClass("is-invalid");
 	// Reset all checkboxes
 	document.querySelectorAll(".process-checkbox-new").forEach((checkbox) => {
 		checkbox.checked = false;
@@ -28,6 +31,8 @@ function resetEntryForm() {
 	});
 	// The main location selector needs to be reeanbled
 	$("#newEntryLocationUniform").prop("disabled", false);
+	// Reset uniform location toggle to being active
+	$("#toggleUniformLocation").prop("checked", true);
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});
@@ -37,18 +42,11 @@ function resetEntryForm() {
 function validateEntryForm() {
 	let isValid = true;
 
-	if (!$("#newEntryRZBK").val().trim()) {
-		$("#newEntryRZBK").addClass("is-invalid");
+	if (!$("#newEntryInstitute").val().trim()) {
+		$("#newEntryInstitute").addClass("is-invalid");
 		isValid = false;
 	} else {
-		$("#newEntryRZBK").removeClass("is-invalid");
-	}
-
-	if (!$("#newEntryName").val().trim()) {
-		$("#newEntryName").addClass("is-invalid");
-		isValid = false;
-	} else {
-		$("#newEntryName").removeClass("is-invalid");
+		$("#newEntryInstitute").removeClass("is-invalid");
 	}
 
 	// Check all checked checkboxes have valid dates
@@ -88,8 +86,8 @@ function updateTempEntriesTable() {
 				(col) => `
             <td class="text-center">
                 <i data-bs-toggle="tooltip" title="${
-									entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] + " ("+resolveLocation(entry[`${col.toLowerCase()}_location`])+")" : ""
-								}" class="bi ${entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
+									entry.processes[col.toLowerCase()] ? entry.processes[col.toLowerCase()].startDate : ""
+								}" class="bi ${entry.processes[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
             </td>
         `
 			)
@@ -99,6 +97,7 @@ function updateTempEntriesTable() {
             <tr>
                 <td>${entry.rzbk}</td>
                 <td>${entry.name}</td>
+                <td>${resolveLocation(entry.location)}</td>
                 ${processColumnsHTML}
                 <td class="text-center">
                     <button class="btn btn-link text-danger p-0 remove-temp-entry" data-index="${index}">
@@ -113,31 +112,51 @@ function updateTempEntriesTable() {
 }
 
 function addToTempEntries() {
-	if (!validateEntryForm()) return;
+    if (!validateEntryForm()) return;
 
-	const newEntry = {
-		rzbk: $("#newEntryRZBK").val().trim(),
-		name: $("#newEntryName").val().trim(),
-	};
+    const uniformLocation = $('#toggleUniformLocation').is(':checked');
+    const instituteId = Number($("#newEntryInstitute").val().trim());
+    const rzbk = Number($("#newEntryRZBK").val().trim());
+    const name = $("#newEntryName").val().trim();
 
-	dateFormatOptions = {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-	};
+    const newEntries = {};
 
-	// Add process values dynamically
-	processNames.forEach((col) => {
-		newEntry[col.toLowerCase()] = $(`#newEntry${col.toLowerCase()}`).prop("checked");
-		newEntry[`${col.toLowerCase()}_date`] = new Date($(`#dateEntry${col.toLowerCase()}`).val()).toLocaleDateString(
-			"de-DE",
-			dateFormatOptions
-		);
-		newEntry[`${col.toLowerCase()}_location`] = $(`#newEntryLocation${col.toLowerCase()}`).val();
-	});
-	tempEntries.push(newEntry);
-	updateTempEntriesTable();
-	resetEntryForm();
+    dateFormatOptions = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    };
+
+    processNames.forEach((col) => {
+        const processChecked = $(`#newEntry${col.toLowerCase()}`).prop("checked");
+        if (processChecked) {
+            const processDate = new Date($(`#dateEntry${col.toLowerCase()}`).val()).toLocaleDateString("de-DE", dateFormatOptions);
+            const processLocation = uniformLocation ? Number($("#newEntryLocationUniform").val()) : Number($(`#newEntryLocation${col.toLowerCase()}`).val());
+
+            const compositeKey = `${instituteId}_${processLocation}`;
+            if (!newEntries[compositeKey]) {
+                newEntries[compositeKey] = {
+                    fk_RPA_Bankenuebersicht: instituteId,
+                    rzbk: rzbk,
+                    name: name,
+                    location: processLocation,
+                    processes: {}
+                };
+            }
+
+            newEntries[compositeKey].processes[col.toLowerCase()] = {
+                checked: processChecked,
+                startDate: processDate
+            };
+        }
+    });
+
+    Object.values(newEntries).forEach(entry => {
+        tempEntries.push(entry);
+    });
+
+    updateTempEntriesTable();
+    resetEntryForm();
 }
 
 function removeTempEntries() {
@@ -159,28 +178,70 @@ function saveAddedEntries() {
 		return;
 	}
 
+	console.log(tempEntries);
+
 	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
+	const combinations = [];
+
 	tempEntries.forEach((entry) => {
-		formattedEntry = {
-			RZBK: Number(entry.rzbk),
-			Name: entry.name,
-			...processNames.reduce(
-				(acc, str) => ({
-					...acc,
-					[str]: {
-						checked: entry[str.toLowerCase()],
-						startDate: entry[`${str.toLowerCase()}_date`] == "Invalid Date" ? "" : entry[`${str.toLowerCase()}_date`],
-					},
-				}),
-				{}
-			),
-		};
-		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
-		insertSorted(data, formattedEntry);
-		// data.push(formattedEntry);
+		console.log(entry);
+		// Check if entry already exists and update it otherwise add it
+		const existingEntryIndex = data.findIndex(
+			(item) => item.fk_Bankenuebersicht === entry.fk_RPA_Bankenuebersicht && item.fk_Location === entry.location
+		);
+
+		if (existingEntryIndex !== -1) {
+			// Update existing entry
+			const existingEntry = data[existingEntryIndex];
+			processNames.forEach((process) => {
+				const processKey = process.toLowerCase();
+				if (entry.processes[processKey]) {
+					existingEntry[process] = {
+						checked: entry.processes[processKey].checked,
+						startDate: entry.processes[processKey].startDate
+					};
+				}
+			});
+		} else {
+			// Add new entry
+			const formattedEntry = {
+				RZBK: Number(entry.rzbk),
+				Name: entry.name,
+				Standort: locationMapping[entry.location],
+				fk_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
+				fk_Location: entry.location,
+				...processNames.reduce((acc, process) => {
+					const processKey = process.toLowerCase();
+					acc[process] = {
+						checked: entry.processes[processKey]?.checked || false,
+						startDate: entry.processes[processKey]?.startDate || ''
+					};
+					return acc;
+				}, {})
+			};
+			insertSorted(data, formattedEntry);
+		}
+
+		// Prepare combinations for database insertion
+		processNames.forEach((process) => {
+			const processKey = process.toLowerCase();
+			if (entry.processes[processKey]) {
+				combinations.push({
+					fk_RPA_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
+					fk_RPA_Prozesse: processMapping[process],
+					fk_RPA_Standort: entry.location,
+					ProduktionsStart: entry.processes[processKey].startDate
+				});
+			}
+		});
 	});
+
+	// Send combinations to the server
+	// createAssignmentRecord(combinations);
+	createAssignmentRecord(combinations, true);
+	console.log(data);
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();
@@ -192,6 +253,7 @@ function saveAddedEntries() {
 		showToast("Failed to add entries", "finish", "danger");
 		console.log(error);
 	}
+
 
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
@@ -227,7 +289,6 @@ function toggleUniformLocation() {
 }
 
 function updateAllLocations() {
-	console.log("Chanb");
 	const curLocation = document.getElementById("newEntryLocationUniform").value;
 	const uniformLocation = $('#toggleUniformLocation').is(':checked');
 	if (uniformLocation) {
