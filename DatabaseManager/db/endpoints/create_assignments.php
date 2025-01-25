@@ -18,7 +18,7 @@ try {
 
     // Get JSON data from request body
     $jsonData = file_get_contents('php://input');
-    $data = json_decode($jsonData, true);
+    $data = json_decode($jsonData); // Removed 'true' parameter to get object instead of array
 
     if ($data === null) {
         throw new Exception('Invalid JSON data provided');

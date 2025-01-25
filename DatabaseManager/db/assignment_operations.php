@@ -8,13 +8,67 @@ class AssignmentOperations
     {
         try {
             $conn = Database::getConnection();
-            // Implementation for creating new assignment(s)
-            // Return success/failure
-            return array(
-                'success' => true,
-                'message' => 'Process created successfully',
-                // 'id' => $row['NewId']
-            );
+
+            if (!isset($data->combinations) || !is_array($data->combinations) || empty($data->combinations)) {
+                throw new Exception("Missing or invalid combinations parameter.");
+            }
+
+            // Check for test mode
+            if (isset($_GET['test']) && $_GET['test'] == 1) {
+                $result = array(
+                    "status" => "test",
+                    "count" => count($data->combinations)
+                );
+            } else {
+                $values = array();
+                $params = array();
+
+                foreach ($data->combinations as $combination) {
+                    if (!isset($combination->fk_RPA_Bankenuebersicht) ||
+                        !isset($combination->fk_RPA_Prozesse) ||
+                        !isset($combination->fk_RPA_Standort) ||
+                        !isset($combination->ProduktionsStart)) {
+                        continue;
+                    }
+
+                    $values[] = "(?, ?, ?, ?)";
+                    $params[] = $combination->fk_RPA_Bankenuebersicht;
+                    $params[] = $combination->fk_RPA_Prozesse;
+                    $params[] = $combination->fk_RPA_Standort;
+                    $params[] = $combination->ProduktionsStart;
+                }
+
+                if (empty($values)) {
+                    throw new Exception("No valid combinations provided.");
+                }
+
+                $sql = "INSERT INTO USEAP_RPA_Prozess_Zuweisung 
+                        (fk_RPA_Bankenuebersicht, fk_RPA_Prozesse, fk_RPA_Standort, ProduktionsStart)
+                        VALUES " . implode(", ", $values);
+
+                $stmt = sqlsrv_query($conn, $sql, $params);
+
+                if ($stmt === false) {
+                    $errors = sqlsrv_errors();
+                    $error_message = "Error inserting records: ";
+                    foreach ($errors as $error) {
+                        $error_message .= $error['message'] . " ";
+                    }
+                    throw new Exception($error_message);
+                }
+
+                $rowsAffected = sqlsrv_rows_affected($stmt);
+                sqlsrv_free_stmt($stmt);
+
+                $result = array(
+                    "status" => "success",
+                    "message" => "Records created successfully.",
+                    "rowsAffected" => $rowsAffected
+                );
+            }
+
+            return $result;
+
         } catch (Exception $e) {
             throw $e;
         } finally {

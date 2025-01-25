@@ -159,6 +159,8 @@ function saveAddedEntries() {
 		return;
 	}
 
+	console.log(tempEntries);
+
 	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
@@ -177,6 +179,7 @@ function saveAddedEntries() {
 				{}
 			),
 		};
+		console.log(formattedEntry);
 		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
 		insertSorted(data, formattedEntry);
 		// data.push(formattedEntry);
@@ -227,7 +230,6 @@ function toggleUniformLocation() {
 }
 
 function updateAllLocations() {
-	console.log("Chanb");
 	const curLocation = document.getElementById("newEntryLocationUniform").value;
 	const uniformLocation = $('#toggleUniformLocation').is(':checked');
 	if (uniformLocation) {
