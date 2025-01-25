@@ -258,6 +258,8 @@ function saveAddedEntries() {
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
 	tempEntries = [];
+	// Reloads the table with the current data of the database
+	manualReload(table);
 }
 
 function toggleUniformLocation() {
