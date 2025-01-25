@@ -115,7 +115,6 @@
     <?php include './db/get_processes.php'; ?>
 
     <script>
-        console.log(processMapping, processNames);
         let table;
         let data;
         // let processNames;

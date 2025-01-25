@@ -21,7 +21,7 @@ try {
     $data = array();
     $prozessnameSet = array();
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-        $data[$row['pk_RPA_Prozesse']] = $row['Prozessname'];
+        $data[$row['Prozessname']] = $row['pk_RPA_Prozesse'];
         $prozessnameSet[] = $row['Prozessname'];
     }
 
