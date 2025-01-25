@@ -122,33 +122,52 @@ function updateTempEntriesTable() {
 }
 
 function addToTempEntries() {
-	if (!validateEntryForm()) return;
+    if (!validateEntryForm()) return;
 
-	const newEntry = {
-		fk_RPA_Bankenuebersicht: Number($("#newEntryInstitute").val().trim()),
-		rzbk: Number($("#newEntryRZBK").val().trim()),
-		name: $("#newEntryName").val().trim(),
-	};
+    const uniformLocation = $('#toggleUniformLocation').is(':checked');
+    const instituteId = Number($("#newEntryInstitute").val().trim());
+    const rzbk = Number($("#newEntryRZBK").val().trim());
+    const name = $("#newEntryName").val().trim();
 
-	dateFormatOptions = {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-	};
+    const newEntries = {};
 
-	// Add process values dynamically
-	processNames.forEach((col) => {
-		newEntry[col.toLowerCase()] = $(`#newEntry${col.toLowerCase()}`).prop("checked");
-		newEntry[`${col.toLowerCase()}_date`] = new Date($(`#dateEntry${col.toLowerCase()}`).val()).toLocaleDateString(
-			"de-DE",
-			dateFormatOptions
-		);
-		newEntry[`${col.toLowerCase()}_location`] = Number($(`#newEntryLocation${col.toLowerCase()}`).val());
-	});
-	tempEntries.push(newEntry);
-	console.log(tempEntries);
-	updateTempEntriesTable();
-	resetEntryForm();
+    dateFormatOptions = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    };
+
+    processNames.forEach((col) => {
+        const processChecked = $(`#newEntry${col.toLowerCase()}`).prop("checked");
+        if (processChecked) {
+            const processDate = new Date($(`#dateEntry${col.toLowerCase()}`).val()).toLocaleDateString("de-DE", dateFormatOptions);
+            const processLocation = uniformLocation ? Number($("#newEntryLocationUniform").val()) : Number($(`#newEntryLocation${col.toLowerCase()}`).val());
+
+            const compositeKey = `${instituteId}_${processLocation}`;
+            if (!newEntries[compositeKey]) {
+                newEntries[compositeKey] = {
+                    fk_RPA_Bankenuebersicht: instituteId,
+                    rzbk: rzbk,
+                    name: name,
+                    location: processLocation,
+                    processes: {}
+                };
+            }
+
+            newEntries[compositeKey].processes[col.toLowerCase()] = {
+                checked: processChecked,
+                startDate: processDate
+            };
+        }
+    });
+
+    Object.values(newEntries).forEach(entry => {
+        tempEntries.push(entry);
+    });
+
+    console.log(tempEntries);
+    updateTempEntriesTable();
+    resetEntryForm();
 }
 
 function removeTempEntries() {
