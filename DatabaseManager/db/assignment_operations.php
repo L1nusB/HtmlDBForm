@@ -146,6 +146,55 @@ class AssignmentOperations
         }
     }
 
+    // Update existing assignment by ID
+    public static function updateAssignmentById($ids, $data)
+    {
+        try {
+            $conn = Database::getConnection();
+
+            if (!is_array($ids) || empty($ids)) {
+                throw new Exception("Missing or invalid IDs parameter.");
+            }
+
+            if (!isset($data->ProduktionsStart)) {
+                throw new Exception("Missing or invalid data parameter.");
+            }
+
+            $idPlaceholders = implode(',', array_fill(0, count($ids), '?'));
+            $params = array_merge([$data->ProduktionsStart], $ids);
+
+            $sql = "UPDATE USEAP_RPA_Prozess_Zuweisung 
+                    SET ProduktionsStart = ? 
+                    WHERE pk_Prozess_Zuweisung IN ($idPlaceholders)";
+
+            $stmt = sqlsrv_query($conn, $sql, $params);
+
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $error_message = "Error updating records: ";
+                foreach ($errors as $error) {
+                    $error_message .= $error['message'] . " ";
+                }
+                throw new Exception($error_message);
+            }
+
+            $rowsAffected = sqlsrv_rows_affected($stmt);
+            sqlsrv_free_stmt($stmt);
+
+            return array(
+                "status" => "success",
+                "message" => "Records updated successfully.",
+                "rowsAffected" => $rowsAffected
+            );
+
+        } catch (Exception $e) {
+            throw $e;
+        } finally {
+            // Close the connection
+            Database::closeConnection();
+        }
+    }
+
     // Delete process
     public static function deleteAssignment($data)
     {
