@@ -74,13 +74,65 @@ function generateLocationSelector() {
             </div>`;
 }
 
+function generateInstituteSelector() {
+    return `<div id="instituteSelector" class="col-12">
+                <label for="newEntryInstitute" class="form-label">Institut</label>
+                <select class="form-select" id="newEntryInstitute" required>
+                    <option value="" selected disabled hidden>Institut wählen...</option>
+                    ${Object.entries(instituteMapping).map(([id, inst]) => 
+                        `<option value="${id}" data-rzbk="${inst.RZBK}">${inst.RZBK} - ${inst.Name}</option>`
+                    ).join('')}
+                </select>
+                <div class="invalid-feedback">
+                    Bitte wählen Sie ein Institut aus.
+                </div>
+            </div>`;
+}
+
 function popuplateAddModal() {
     // Setup table for temporary entries
     $('#tempEntriesContainer').replaceWith(generateAddModalTempTable());
+    
+    // Add institute selector before RZBK/Name inputs
+    $('.row.g-3').prepend(generateInstituteSelector());
+    
+    // Disable RZBK/Name inputs
+    $('#newEntryRZBK, #newEntryName').prop('readonly', true);
 
+    // Initialize Select2 after DOM ready
+    $(document).ready(function() {
+        $('#newEntryInstitute').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Institut suchen...',
+            allowClear: true,
+            dropdownParent: $('#addEntriesModal')
+        });
+    });
+    
+    // Add change handler for institute selector
+    $('#newEntryInstitute').on('change', function() {
+        const selectedId = $(this).val();
+        if (selectedId) {
+            const institute = instituteMapping[selectedId];
+            $('#newEntryRZBK').val(institute.RZBK);
+            $('#newEntryName').val(institute.Name);
+        } else {
+            $('#newEntryRZBK, #newEntryName').val('');
+        }
+    });
+
+    // // Initialize Select2 on institute selector
+    // $('#newEntryInstitute').select2({
+    //     theme: 'bootstrap-5',
+    //     width: '100%',
+    //     placeholder: 'Institut suchen...',
+    //     allowClear: true
+    // });
+    
     // Setup the entry form
     $('#addModalProcessSelector').replaceWith(generateAddModalEntryForm());
-
+    
     // Setup location selector
     $('#locationSelector').replaceWith(generateLocationSelector());
 }

@@ -8,8 +8,10 @@ function enterAddMode() {
 
 // Function to reset the entry form on Cancel or Save (Exit Modal)
 function resetEntryForm() {
-	$("#newEntryRZBK").val("").removeClass("is-invalid");
-	$("#newEntryName").val("").removeClass("is-invalid");
+	$("#newEntryRZBK").val("");
+	$("#newEntryName").val("");
+	// Trigger change to update Select2
+	$("#newEntryInstitute").val("").trigger('change').removeClass("is-invalid");
 	// Reset all checkboxes
 	document.querySelectorAll(".process-checkbox-new").forEach((checkbox) => {
 		checkbox.checked = false;
@@ -37,18 +39,25 @@ function resetEntryForm() {
 function validateEntryForm() {
 	let isValid = true;
 
-	if (!$("#newEntryRZBK").val().trim()) {
-		$("#newEntryRZBK").addClass("is-invalid");
-		isValid = false;
-	} else {
-		$("#newEntryRZBK").removeClass("is-invalid");
-	}
+	// if (!$("#newEntryRZBK").val().trim()) {
+	// 	$("#newEntryRZBK").addClass("is-invalid");
+	// 	isValid = false;
+	// } else {
+	// 	$("#newEntryRZBK").removeClass("is-invalid");
+	// }
 
-	if (!$("#newEntryName").val().trim()) {
-		$("#newEntryName").addClass("is-invalid");
+	// if (!$("#newEntryName").val().trim()) {
+	// 	$("#newEntryName").addClass("is-invalid");
+	// 	isValid = false;
+	// } else {
+	// 	$("#newEntryName").removeClass("is-invalid");
+	// }
+
+	if (!$("#newEntryInstitute").val().trim()) {
+		$("#newEntryInstitute").addClass("is-invalid");
 		isValid = false;
 	} else {
-		$("#newEntryName").removeClass("is-invalid");
+		$("#newEntryInstitute").removeClass("is-invalid");
 	}
 
 	// Check all checked checkboxes have valid dates
@@ -116,6 +125,7 @@ function addToTempEntries() {
 	if (!validateEntryForm()) return;
 
 	const newEntry = {
+		fk_RPA_Bankenuebersicht: $("#newEntryInstitute").val().trim(),
 		rzbk: $("#newEntryRZBK").val().trim(),
 		name: $("#newEntryName").val().trim(),
 	};

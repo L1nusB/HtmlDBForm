@@ -12,31 +12,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <!-- Custom styles -->
-     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
         <div class="action-buttons btn-group">
-                <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="processDropdown" id="processMenu">
-                    <div class="d-flex justify-content-center">
-                        <div class="form-check form-switch">
-                            <input type="checkbox" role="switch" class="form-check-input" id="toggleDates" checked>
-                            <label class="form-check-label" for="toggleDates">Show Dates</label>
-                        </div>
+            <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="processDropdown" id="processMenu">
+                <div class="d-flex justify-content-center">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" role="switch" class="form-check-input" id="toggleDates" checked>
+                        <label class="form-check-label" for="toggleDates">Show Dates</label>
                     </div>
-                    <!-- Title for the dropdown -->
-                    <li class="dropdown-header text-center">
-                        <span class="fw-bold">Prozesse</span>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <!-- Checkboxes will be populated dynamically -->
-                </ul>
+                </div>
+                <!-- Title for the dropdown -->
+                <li class="dropdown-header text-center">
+                    <span class="fw-bold">Prozesse</span>
+                    <hr class="dropdown-divider">
+                </li>
+                <!-- Checkboxes will be populated dynamically -->
+            </ul>
             <button id="deleteBtn" class="btn btn-danger me-2 rounded disabled">
                 <i class="bi bi-trash"></i> Delete
             </button>
@@ -83,6 +86,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
@@ -102,9 +107,9 @@
 
     <!-- Embed PHP variables as JavaScript -->
     <!-- Defines instituteMappingTest -->
-    <?php include './db/create_bankenmap.php';?>
+    <?php include './db/create_bankenmap.php'; ?>
     <!-- Defines locationMapping and locationAssignment -->
-    <?php include './db/check_standort.php';?>
+    <?php include './db/check_standort.php'; ?>
 
     <script>
         let table;
@@ -151,13 +156,12 @@
                             url: './db/get_data.php',
                             dataSrc: prepareDatabaseData,
                         },
-                        initComplete: function (settings, json) {
+                        initComplete: function(settings, json) {
                             data = table.rows().data().toArray();
                             // Start auto-reload after initialization every 30 seconds
                             // reloadInterval = startAutoReload(table, reloadInterval);
                         },
-                        columns: [
-                            {
+                        columns: [{
                                 data: null,
                                 title: '#',
                                 orderable: false,
@@ -223,28 +227,30 @@
                                 }
                             }
                         ],
-                        order: [[1, 'asc']],
+                        order: [
+                            [1, 'asc']
+                        ],
                         // Do not allow ordering as it messes up in editing and deleting.
                         ordering: false,
                     });
                     // Enable the buttons after the table is initialized
                     enableButtons();
-                    
+
                     // Populate the Add Modal with process names
                     popuplateAddModal();
-                    
+
                     // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     table.on('page', handlePageChange);
                     // Handle ordering change event (Make sure that all checkboxes/fields are shown and in the correct state)
                     // table.on('order', handleOrderingChange);
-                    
+
                     //// ----- Edit Mode ----- ////
                     {
                         // Handle Modify button click to enter Edit mode
                         $('#modifyBtn').click(enterEditMode);
                         // Handle Save button click
                         $('#modifySaveBtn').click(handleSave);
-                    
+
                         // Handle Cancel button click
                         $('#modifyCancelBtn').click(handleCancel);
                         // Handle Modal Save confirmation 
@@ -271,7 +277,7 @@
                             modifyProcessDetails(modifyButton);
                         });
                     }
-                    
+
                     //// ----- Add Mode/Modal ----- ////
                     {
                         // Add button click handler to enter Add mode
@@ -279,13 +285,13 @@
 
                         // Handle Add Entry button click in Modal
                         $('#addToTempBtn').click(addToTempEntries);
-                        
+
                         // Handle remove temporary entry in Modal
                         $('#tempEntriesBody').on('click', '.remove-temp-entry', removeTempEntries);
-                        
+
                         // Handle Save All Entries button click to finalize adding entries
                         $('#saveNewEntriesBtn').click(saveAddedEntries);
-                        
+
                         // Handle modal hidden event
                         $('#addEntriesModal').on('hidden.bs.modal', resetOnHidden);
 
@@ -299,7 +305,7 @@
                         // Toggle dates on checkbox change
                         $('#newEntryLocationUniform').change(updateAllLocations);
                     }
-                    
+
                     //// ----- Deletion Mode ----- ////
                     {
                         // Delete button click handler to enter Delete mode
@@ -317,7 +323,7 @@
                                 exitDeleteMode();
                                 return;
                             }
-                            
+
                             $('#confirmDeleteModal').modal('show');
                         });
                         //// Confirmation Modals Delete Mode ////
@@ -331,7 +337,7 @@
 
                     // Initialize Bootstrap tooltips
                     $('[data-toggle="tooltip"]').tooltip();
-                    
+
                     // Toggle dates on checkbox change
                     $('#toggleDates').change(function() {
                         table.rows().invalidate().draw(); // Redraw the table to reflect changes
@@ -362,10 +368,10 @@
                     console.error('Error fetching data:', error);
                 },
             });
-            
+
         });
     </script>
-    
+
 </body>
 
 </html>

@@ -33,7 +33,7 @@ try {
 
     // Pass the mapping to JavaScript
     echo "<script>
-            const instituteMappingTest = " . json_encode($instituteMapping) . ";
+            const instituteMapping = " . json_encode($instituteMapping) . ";
         </script>";
 } catch (Exception $e) {
     http_response_code(500);
