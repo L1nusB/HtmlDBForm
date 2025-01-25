@@ -101,6 +101,57 @@ class AssignmentOperations
         }
     }
 
+    // Update multiple assignments
+    public static function updateAssignments($data)
+    {
+        try {
+            // Connection is a singleton, so we don't need to close it here
+            // and it causes no overhead to call getConnection() multiple times
+            $conn = Database::getConnection();
+
+            if (!isset($data->combinations) || !is_array($data->combinations) || empty($data->combinations)) {
+                throw new Exception("Missing or invalid combinations parameter.");
+            }
+
+            // Check for test mode
+            if (isset($_GET['test']) && $_GET['test'] == 1) {
+                return array(
+                    "status" => "test",
+                    "count" => count($data->combinations)
+                );
+            }
+
+            $rowsAffected = 0;
+
+            foreach ($data->combinations as $combination) {
+                if (
+                    !isset($combination->fk_RPA_Bankenuebersicht) ||
+                    !isset($combination->fk_RPA_Prozesse) ||
+                    !isset($combination->fk_RPA_Standort) ||
+                    !isset($combination->ProduktionsStart)
+                ) {
+                    continue;
+                }
+
+                $result = self::updateAssignment($combination, true);
+                if ($result['status'] == 'success') {
+                    $rowsAffected += $result['rowsAffected'];
+                }
+            }
+
+            return array(
+                "status" => "success",
+                "message" => "Records updated successfully.",
+                "rowsAffected" => $rowsAffected
+            );
+        } catch (Exception $e) {
+            throw $e;
+        } finally {
+            // Close the connection
+            Database::closeConnection();
+        }
+    }
+
     // Update existing assignment
     public static function updateAssignment($combination, $keepOpen = false)
     {
@@ -114,6 +165,14 @@ class AssignmentOperations
                 !isset($combination->ProduktionsStart)
             ) {
                 throw new Exception("Missing or invalid combination parameter.");
+            }
+
+            // Check for test mode
+            if (isset($_GET['test']) && $_GET['test'] == 1) {
+                return array(
+                    "status" => "test",
+                    "count" => 1
+                );
             }
 
             $sql = "UPDATE USEAP_RPA_Prozess_Zuweisung 
@@ -162,6 +221,14 @@ class AssignmentOperations
 
             if (!isset($data->ProduktionsStart)) {
                 throw new Exception("Missing or invalid data parameter.");
+            }
+
+            // Check for test mode
+            if (isset($_GET['test']) && $_GET['test'] == 1) {
+                return array(
+                    "status" => "test",
+                    "count" => count($ids)
+                );
             }
 
             $idPlaceholders = implode(',', array_fill(0, count($ids), '?'));

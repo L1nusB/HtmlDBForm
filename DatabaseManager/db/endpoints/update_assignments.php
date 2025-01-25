@@ -16,17 +16,15 @@ try {
                                         "message" => "Method not allowed. Only POST requests are accepted."));
     }
 
-    // Get RZBK from URL parameter
-    $rzbk = $_GET['rzbk'] ?? null;
-    
-    if ($rzbk === null) {
-        throw new Exception('No RZBK provided');
+    $json = file_get_contents('php://input');
+    $data = json_decode($json);
+
+    if ($data === null) {
+        throw new Exception('Invalid JSON data provided');
     }
 
-    $data = null;
-
     // Delete the process using the operations class
-    $result = AssignmentOperations::updateAssignment($rzbk, $data);
+    $result = AssignmentOperations::updateAssignments($data);
     
     // Return success response
     echo json_encode($result);

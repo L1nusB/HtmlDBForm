@@ -1,9 +1,9 @@
-function createAssignmentRecord(combinations, testMode = false) {
+function deleteAssignmentRecord(combinations, testMode = false) {
     const data = {
         combinations: combinations // Array of objects
     };
 
-    let url = './db/endpoints/create_assignments.php'; // Base URL
+    let url = './db/endpoints/delete_assignments.php'; // Base URL
     if (testMode) {
         url += '?test=1'; // Add test parameter if testMode is true
     }
@@ -18,20 +18,20 @@ function createAssignmentRecord(combinations, testMode = false) {
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            showToast(`Successfully added ${data.rowsAffected} entries`, "finish", "success");
+            showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
-                alert("Test Mode: Would add " + data.count + " record(s).");
-                console.log("Would add: " + data.count);
-                showToast(`Would add ${data.count} entries`, "finish", "success");
+                alert("Test Mode: Would delete " + data.count + " record(s).");
+                console.log("Would delete: " + data.count);
+                showToast(`Successfully removed ${data.count} entries`, "finish", "success");
             } else {
-                console.log("Test data:", data);
+                console.log("Test data:", data); // Log the full test data for debugging
                 alert("Test Mode: " + JSON.stringify(data));
-                showToast(`Problem during test creation ${JSON.stringify(data)}`, "finish", "danger");
+                showToast(`Problem during test deletion ${JSON.stringify(data)} entries`, "finish", "danger");
             }
         } else {
             console.error(JSON.stringify(data));
-            showToast(`Failed to create entries ${JSON.stringify(data)}`, "finish", "danger");
+            showToast(`Failed to remove entries ${JSON.stringify(data)}`, "finish", "danger");
         }
     })
     .catch(error => {

@@ -1,9 +1,10 @@
-function deleteRecord(combinations, testMode = false) {
+function updateAssignmentRecord(combinations, testMode = false) {
+    console.log("Updating assignments:", combinations);
     const data = {
         combinations: combinations // Array of objects
     };
 
-    let url = './db/endpoints/delete_assignments.php'; // Base URL
+    let url = './db/endpoints/update_assignments.php'; // Base URL
     if (testMode) {
         url += '?test=1'; // Add test parameter if testMode is true
     }
@@ -18,20 +19,20 @@ function deleteRecord(combinations, testMode = false) {
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
+            showToast(`Successfully updates ${data.rowsAffected} entries`, "finish", "success");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
-                alert("Test Mode: Would delete " + data.count + " record(s).");
-                console.log("Would delete: " + data.count);
-                showToast(`Successfully removed ${data.count} entries`, "finish", "success");
+                alert("Test Mode: Would update " + data.count + " record(s).");
+                console.log("Would update: " + data.count);
+                showToast(`Successfully updated ${data.count} entries`, "finish", "success");
             } else {
                 console.log("Test data:", data); // Log the full test data for debugging
                 alert("Test Mode: " + JSON.stringify(data));
-                showToast(`Problem during test deletion ${JSON.stringify(data)} entries`, "finish", "danger");
+                showToast(`Problem during test update ${JSON.stringify(data)}`, "finish", "danger");
             }
         } else {
             console.error(JSON.stringify(data));
-            showToast(`Failed to remove entries ${JSON.stringify(data)}`, "finish", "danger");
+            showToast(`Failed to update entries ${JSON.stringify(data)}`, "finish", "danger");
         }
     })
     .catch(error => {

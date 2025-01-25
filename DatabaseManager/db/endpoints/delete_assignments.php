@@ -15,6 +15,7 @@ try {
         echo json_encode(array("status" => "error", 
                                         "message" => "Method not allowed. Only POST requests are accepted."));
     }
+    
     $json = file_get_contents('php://input');
     $data = json_decode($json);
 
