@@ -30,6 +30,8 @@ function resetEntryForm() {
 	});
 	// The main location selector needs to be reeanbled
 	$("#newEntryLocationUniform").prop("disabled", false);
+	// Reset uniform location toggle to being active
+	$("#toggleUniformLocation").prop("checked", true);
 	processNames.forEach((col) => {
 		$(`#newEntry${col}`).prop("checked", false);
 	});

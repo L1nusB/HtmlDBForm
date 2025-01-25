@@ -1,19 +1,21 @@
 function generateAddModalTempTable() {
 	return `<div id="tempEntriesContainer" class="mb-4 d-none">
                 <h6>Entries to be added:</h6>
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>RZBK</th>
-                            <th>Name</th>
-                            <th>Standort</th>
-                            ${processNames.map(col => `<th class="text-center">${col}</th>`).join('')}
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tempEntriesBody">
-                    </tbody>
-                </table>
+                <div style="max-height: 300px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>RZBK</th>
+                                <th>Name</th>
+                                <th>Standort</th>
+                                ${processNames.map(col => `<th class="text-center">${col}</th>`).join('')}
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tempEntriesBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>`;
 }
 
