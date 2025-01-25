@@ -96,6 +96,7 @@
     <script src="./js/dataOverview.js"></script>
     <script src="./js/retrieveData.js"></script>
     <script src="./js/toggleButtons.js"></script>
+    <script src="./js/DB/createAssignment.js"></script>
     <script src="./js/addMode.js"></script>
 
 

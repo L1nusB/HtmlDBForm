@@ -1,4 +1,5 @@
-function createAssigmentRecord(combinations, testMode = false) {
+function createAssignmentRecord(combinations, testMode = false) {
+    console.log("Creating assignment record(s):", combinations);
     const data = {
         combinations: combinations // Array of objects
     };

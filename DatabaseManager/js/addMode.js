@@ -177,8 +177,12 @@ function saveAddedEntries() {
 		return;
 	}
 
+	console.log(tempEntries);
+
 	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
+
+	const combinations = [];
 
 	tempEntries.forEach((entry) => {
 		// Check if entry already exists and update it otherwise add it
@@ -217,7 +221,24 @@ function saveAddedEntries() {
 			};
 			insertSorted(data, formattedEntry);
 		}
+
+		// Prepare combinations for database insertion
+		processNames.forEach((process) => {
+			const processKey = process.toLowerCase();
+			if (entry.processes[processKey]) {
+				combinations.push({
+					fk_RPA_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
+					fk_RPA_Prozesse: processKey,
+					fk_RPA_Standort: entry.location,
+					ProduktionsStart: entry.processes[processKey].startDate
+				});
+			}
+		});
 	});
+
+	// Send combinations to the server
+	createAssignmentRecord(combinations, true);
+	console.log(data);
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();
@@ -229,6 +250,7 @@ function saveAddedEntries() {
 		showToast("Failed to add entries", "finish", "danger");
 		console.log(error);
 	}
+
 
 	// Close modal and reset
 	$("#addEntriesModal").modal("hide");
