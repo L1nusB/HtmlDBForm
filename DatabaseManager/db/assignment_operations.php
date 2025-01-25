@@ -55,34 +55,37 @@ class AssignmentOperations
                         $params[] = $combination->fk_RPA_Prozesse;
                         $params[] = $combination->fk_RPA_Standort;
                         $params[] = $combination->ProduktionsStart;
+                    } else {
+                        // Update existing record
+                        self::updateAssignment($combination);
                     }
                 }
 
-                if (empty($values)) {
-                    throw new Exception("No valid combinations provided or all records already exist.");
-                }
+                if (!empty($values)) {
+                    $sql = "INSERT INTO USEAP_RPA_Prozess_Zuweisung 
+                            (fk_RPA_Bankenuebersicht, fk_RPA_Prozesse, fk_RPA_Standort, ProduktionsStart)
+                            VALUES " . implode(", ", $values);
 
-                $sql = "INSERT INTO USEAP_RPA_Prozess_Zuweisung 
-                        (fk_RPA_Bankenuebersicht, fk_RPA_Prozesse, fk_RPA_Standort, ProduktionsStart)
-                        VALUES " . implode(", ", $values);
+                    $stmt = sqlsrv_query($conn, $sql, $params);
 
-                $stmt = sqlsrv_query($conn, $sql, $params);
-
-                if ($stmt === false) {
-                    $errors = sqlsrv_errors();
-                    $error_message = "Error inserting records: ";
-                    foreach ($errors as $error) {
-                        $error_message .= $error['message'] . " ";
+                    if ($stmt === false) {
+                        $errors = sqlsrv_errors();
+                        $error_message = "Error inserting records: ";
+                        foreach ($errors as $error) {
+                            $error_message .= $error['message'] . " ";
+                        }
+                        throw new Exception($error_message);
                     }
-                    throw new Exception($error_message);
-                }
 
-                $rowsAffected = sqlsrv_rows_affected($stmt);
-                sqlsrv_free_stmt($stmt);
+                    $rowsAffected = sqlsrv_rows_affected($stmt);
+                    sqlsrv_free_stmt($stmt);
+                } else {
+                    $rowsAffected = 0;
+                }
 
                 $result = array(
                     "status" => "success",
-                    "message" => "Records created successfully.",
+                    "message" => "Records created/updated successfully.",
                     "rowsAffected" => $rowsAffected
                 );
             }
@@ -97,18 +100,44 @@ class AssignmentOperations
         }
     }
 
-    // Update existing process
-    public static function updateAssignment($id, $data)
+    // Update existing assignment
+    public static function updateAssignment($combination)
     {
         try {
             $conn = Database::getConnection();
-            // Implementation for updating assignment(s)
-            // Return success/failure
+
+            if (!isset($combination->fk_RPA_Bankenuebersicht) ||
+                !isset($combination->fk_RPA_Prozesse) ||
+                !isset($combination->fk_RPA_Standort) ||
+                !isset($combination->ProduktionsStart)) {
+                throw new Exception("Missing or invalid combination parameter.");
+            }
+
+            $sql = "UPDATE USEAP_RPA_Prozess_Zuweisung 
+                    SET ProduktionsStart = ? 
+                    WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Prozesse = ? AND fk_RPA_Standort = ?";
+            $params = array($combination->ProduktionsStart, $combination->fk_RPA_Bankenuebersicht, $combination->fk_RPA_Prozesse, $combination->fk_RPA_Standort);
+
+            $stmt = sqlsrv_query($conn, $sql, $params);
+
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $error_message = "Error updating record: ";
+                foreach ($errors as $error) {
+                    $error_message .= $error['message'] . " ";
+                }
+                throw new Exception($error_message);
+            }
+
+            $rowsAffected = sqlsrv_rows_affected($stmt);
+            sqlsrv_free_stmt($stmt);
+
             return array(
-                'success' => true,
-                'message' => 'Process created successfully',
-                // 'id' => $row['NewId']
+                "status" => "success",
+                "message" => "Record updated successfully.",
+                "rowsAffected" => $rowsAffected
             );
+
         } catch (Exception $e) {
             throw $e;
         } finally {
@@ -209,3 +238,4 @@ class AssignmentOperations
         }
     }
 }
+?>
