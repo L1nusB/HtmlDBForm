@@ -31,15 +31,35 @@ class AssignmentOperations
                         continue;
                     }
 
-                    $values[] = "(?, ?, ?, ?)";
-                    $params[] = $combination->fk_RPA_Bankenuebersicht;
-                    $params[] = $combination->fk_RPA_Prozesse;
-                    $params[] = $combination->fk_RPA_Standort;
-                    $params[] = $combination->ProduktionsStart;
+                    // Check if the record already exists
+                    $checkSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung 
+                                 WHERE fk_RPA_Bankenuebersicht = ? AND fk_RPA_Prozesse = ? AND fk_RPA_Standort = ?";
+                    $checkParams = array($combination->fk_RPA_Bankenuebersicht, $combination->fk_RPA_Prozesse, $combination->fk_RPA_Standort);
+                    $checkStmt = sqlsrv_query($conn, $checkSql, $checkParams);
+
+                    if ($checkStmt === false) {
+                        $errors = sqlsrv_errors();
+                        $error_message = "Error checking existing records: ";
+                        foreach ($errors as $error) {
+                            $error_message .= $error['message'] . " ";
+                        }
+                        throw new Exception($error_message);
+                    }
+
+                    $row = sqlsrv_fetch_array($checkStmt, SQLSRV_FETCH_ASSOC);
+                    sqlsrv_free_stmt($checkStmt);
+
+                    if ($row['count'] == 0) {
+                        $values[] = "(?, ?, ?, ?)";
+                        $params[] = $combination->fk_RPA_Bankenuebersicht;
+                        $params[] = $combination->fk_RPA_Prozesse;
+                        $params[] = $combination->fk_RPA_Standort;
+                        $params[] = $combination->ProduktionsStart;
+                    }
                 }
 
                 if (empty($values)) {
-                    throw new Exception("No valid combinations provided.");
+                    throw new Exception("No valid combinations provided or all records already exist.");
                 }
 
                 $sql = "INSERT INTO USEAP_RPA_Prozess_Zuweisung 
