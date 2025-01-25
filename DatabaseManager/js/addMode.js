@@ -125,8 +125,8 @@ function addToTempEntries() {
 	if (!validateEntryForm()) return;
 
 	const newEntry = {
-		fk_RPA_Bankenuebersicht: $("#newEntryInstitute").val().trim(),
-		rzbk: $("#newEntryRZBK").val().trim(),
+		fk_RPA_Bankenuebersicht: Number($("#newEntryInstitute").val().trim()),
+		rzbk: Number($("#newEntryRZBK").val().trim()),
 		name: $("#newEntryName").val().trim(),
 	};
 
@@ -143,9 +143,10 @@ function addToTempEntries() {
 			"de-DE",
 			dateFormatOptions
 		);
-		newEntry[`${col.toLowerCase()}_location`] = $(`#newEntryLocation${col.toLowerCase()}`).val();
+		newEntry[`${col.toLowerCase()}_location`] = Number($(`#newEntryLocation${col.toLowerCase()}`).val());
 	});
 	tempEntries.push(newEntry);
+	console.log(tempEntries);
 	updateTempEntriesTable();
 	resetEntryForm();
 }
@@ -178,6 +179,7 @@ function saveAddedEntries() {
 		formattedEntry = {
 			RZBK: Number(entry.rzbk),
 			Name: entry.name,
+			fk_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
 			...processNames.reduce(
 				(acc, str) => ({
 					...acc,
@@ -194,6 +196,7 @@ function saveAddedEntries() {
 		insertSorted(data, formattedEntry);
 		// data.push(formattedEntry);
 	});
+	console.log(data);
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();
