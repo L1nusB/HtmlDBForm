@@ -30,8 +30,8 @@ function deleteRecord(combinations, testMode = false) {
                 showToast(`Problem during test deletion ${JSON.stringify(data)} entries`, "finish", "danger");
             }
         } else {
-            console.error(data.message);
-            showToast("Failed to remove entries", "finish", "danger");
+            console.error(JSON.stringify(data));
+            showToast(`Failed to remove entries ${JSON.stringify(data)}`, "finish", "danger");
         }
     })
     .catch(error => {

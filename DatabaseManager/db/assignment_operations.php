@@ -24,10 +24,12 @@ class AssignmentOperations
                 $params = array();
 
                 foreach ($data->combinations as $combination) {
-                    if (!isset($combination->fk_RPA_Bankenuebersicht) ||
+                    if (
+                        !isset($combination->fk_RPA_Bankenuebersicht) ||
                         !isset($combination->fk_RPA_Prozesse) ||
                         !isset($combination->fk_RPA_Standort) ||
-                        !isset($combination->ProduktionsStart)) {
+                        !isset($combination->ProduktionsStart)
+                    ) {
                         continue;
                     }
 
@@ -91,7 +93,6 @@ class AssignmentOperations
             }
 
             return $result;
-
         } catch (Exception $e) {
             throw $e;
         } finally {
@@ -106,10 +107,12 @@ class AssignmentOperations
         try {
             $conn = Database::getConnection();
 
-            if (!isset($combination->fk_RPA_Bankenuebersicht) ||
+            if (
+                !isset($combination->fk_RPA_Bankenuebersicht) ||
                 !isset($combination->fk_RPA_Prozesse) ||
                 !isset($combination->fk_RPA_Standort) ||
-                !isset($combination->ProduktionsStart)) {
+                !isset($combination->ProduktionsStart)
+            ) {
                 throw new Exception("Missing or invalid combination parameter.");
             }
 
@@ -137,7 +140,6 @@ class AssignmentOperations
                 "message" => "Record updated successfully.",
                 "rowsAffected" => $rowsAffected
             );
-
         } catch (Exception $e) {
             throw $e;
         } finally {
@@ -188,7 +190,6 @@ class AssignmentOperations
                 "message" => "Records updated successfully.",
                 "rowsAffected" => $rowsAffected
             );
-
         } catch (Exception $e) {
             throw $e;
         } finally {
@@ -210,31 +211,26 @@ class AssignmentOperations
             }
             $combinations = $data->combinations;
 
-            // Build the IN clauses and parameters
-            $institutePlaceholders = [];
-            $locationPlaceholders = [];
-            $params = [];
+            $whereClauses = [];
 
             foreach ($combinations as $combination) {
                 if (isset($combination->fk_RPA_Bankenuebersicht) && isset($combination->fk_RPA_Standort)) {
-                    $institutePlaceholders[] = '?';
-                    $locationPlaceholders[] = '?';
+                    $whereClauses[] = "(fk_RPA_Bankenuebersicht = ? AND fk_RPA_Standort = ?)";
                     $params[] = $combination->fk_RPA_Bankenuebersicht;
                     $params[] = $combination->fk_RPA_Standort;
                 }
             }
 
-            if (empty($institutePlaceholders)) {
+            if (empty($whereClauses)) {
                 throw new Exception("No valid combinations provided.");
             }
 
-            $instituteInClause = implode(',', $institutePlaceholders);
-            $locationInClause = implode(',', $locationPlaceholders);
+            $whereClause = implode(' OR ', $whereClauses);
 
             // Check for the 'test' parameter
             if (isset($_GET['test']) && $_GET['test'] == 1) {
                 // Use SELECT COUNT(*) to simulate the delete
-                $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE (fk_RPA_Bankenuebersicht IN ($instituteInClause)) AND (fk_RPA_Standort IN ($locationInClause))";
+                $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE $whereClause";
                 $countStmt = sqlsrv_query($conn, $countSql, $params);
                 if ($countStmt === false) {
                     $errors = sqlsrv_errors();
@@ -256,7 +252,7 @@ class AssignmentOperations
                 }
                 sqlsrv_free_stmt($countStmt);
             } else {
-                $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE (fk_RPA_Bankenuebersicht IN ($instituteInClause)) AND (fk_RPA_Standort IN ($locationInClause))";
+                $sql = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE $whereClause";
                 // Execute the query as usual
                 $stmt = sqlsrv_query($conn, $sql, $params);
                 if ($stmt === false) {
@@ -289,4 +285,3 @@ class AssignmentOperations
         }
     }
 }
-?>
