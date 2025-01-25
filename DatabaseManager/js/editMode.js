@@ -91,7 +91,7 @@ function updateRowHighlight() {
 	table.$(".revert-btn").removeClass("active");
 
 	// Then add highlight to modified rows and activate their revert buttons
-	Object.entries(modifiedRows).forEach((rowIndex, processes) => {
+	Object.entries(modifiedRows).forEach(([rowIndex, processes]) => {
 		const row = table.row(rowIndex);
 		$(row.node()).addClass("modified-row");
 		$(row.node()).find(".revert-btn").addClass("active");
@@ -104,14 +104,19 @@ function updateRowHighlight() {
 }
 
 function finalizeSave() {
-	const hasChanges = modifiedRows.size > 0;
+	console.log("Finalizing save");
+	console.log("Modified Rows", modifiedRows);
+	const hasChanges = Object.keys(modifiedRows).length > 0;
 	if (hasChanges) {
 		const modifiedSummary = createModifiedSummary(data, originalData, processNames, modifiedRows);
 		const numModifications = Object.values(modifiedSummary).reduce((total, arr) => {
 									return total + (Array.isArray(arr) ? arr.length : 0);
 								}, 0);
+		console.log("Modified Summary", modifiedSummary);
 		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
-		// Send to database
+		// Update records in the database
+		// updateAssignmentRecord(combinationData);
+		updateAssignmentRecord(combinationData, true);
 	} else {
 		showToast("No changes were made", "finish", "info");
 	}
@@ -178,8 +183,7 @@ function clearValidationErrors() {
 function validate() {
 	clearValidationErrors();
 	let isValid = true;
-	Object.entries(modifiedRows).forEach((rowIndex, processes) => {
-		console.log(rowIndex, processes);
+	Object.entries(modifiedRows).forEach(([rowIndex, processes]) => {
 		// Check all checked checkboxes have valid dates
 		const rowNode = table.row(rowIndex).node();
 
@@ -213,10 +217,12 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
 	const newProcesses = [];
     const updatedProcesses = [];
     const removedProcesses = [];
-
-    modifiedRows.forEach(rowIndex => {
+	console.log("data", data);
+	Object.entries(modifiedRows).forEach(([rowIndex, processes]) => {
+		console.log(rowIndex, processes);
         const currentRow = data[rowIndex];
         const originalRow = originalData[rowIndex];
+		console.log(currentRow);
 		const fk_RPA_Bankenuebersicht = currentRow.fk_Bankenuebersicht;
 
         processNames.forEach(processName => {
@@ -228,12 +234,12 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                 return;
             }
 
-            // Create info object with all properties except 'checked'
+            // Create info object with all properties except 'checked', 'processID' and 'pkAssignmentID'
             const processInfo = {
                 rowIndex,
                 processName,
                 ...Object.fromEntries(
-                    Object.entries(current).filter(([key]) => key !== 'checked')
+                    Object.entries(current).filter(([key]) => !["checked", "processID", "pkAssignmentID"].includes(key))
                 )
             };
 
@@ -242,22 +248,28 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                 newProcesses.push({
                     ...processInfo,
                     checked: current.checked,
+                    pk_Prozess_Zuweisung: current.pkAssignmentID,
+                    fk_RPA_Prozesse: current.processID,
 					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                 });
             } else if (original.checked && !current.checked) {
-                // Removed process
+				// Removed process
                 removedProcesses.push({
-                    ...processInfo,
+					...processInfo,
                     checked: current.checked,
+					pk_Prozess_Zuweisung: current.pkAssignmentID,
+					fk_RPA_Prozesse: current.processID,
 					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                 });
             } else if (original.checked && current.checked) {
-                // If checked is true in both, directly compare the objects
+				// If checked is true in both, directly compare the objects
                 if (!deepEqual(current, original)) {
-                    updatedProcesses.push({
-                        ...processInfo,
+					updatedProcesses.push({
+						...processInfo,
                         checked: current.checked,
                         previous: original,
+						pk_Prozess_Zuweisung: current.pkAssignmentID,
+						fk_RPA_Prozesse: current.processID,
 						fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
                     });
                 }
@@ -273,6 +285,7 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
 }
 
 function handleSave() {
+	console.log("Start save");
 	clearValidationErrors();
 	if (Object.keys(modifiedRows).length > 0) {
 		if (!validate()) {
@@ -299,6 +312,7 @@ function handleCancel() {
 }
 
 function confirmSave() {
+	console.log("Confirmed save");
 	$("#saveModal").modal("hide");
 	finalizeSave();
 }

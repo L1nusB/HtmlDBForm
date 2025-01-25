@@ -19,6 +19,7 @@ try {
             Name, 
             Prozessname, 
             ProduktionsStart,
+            pk_Prozess_Zuweisung,
             fk_RPA_Bankenuebersicht,
             fk_RPA_Standort,
             fk_RPA_Prozesse
