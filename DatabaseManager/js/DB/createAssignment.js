@@ -21,9 +21,9 @@ function createAssignmentRecord(combinations, testMode = false) {
             showToast(`Successfully added ${data.rowsAffected} entries`, "finish", "success");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
-                alert("Test Mode: Would add " + data.count + " record(s).");
-                console.log("Would add: " + data.count);
-                showToast(`Would add ${data.count} entries`, "finish", "success");
+                alert("Test Mode: Would add " + data.rowsAffected + " record(s).");
+                console.log("Would add: " + data.rowsAffected);
+                showToast(`Would add ${data.rowsAffected} entries`, "finish", "success");
             } else {
                 console.log("Test data:", data);
                 alert("Test Mode: " + JSON.stringify(data));

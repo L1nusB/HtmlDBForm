@@ -21,9 +21,9 @@ function deleteAssignmentRecord(combinations, testMode = false) {
             showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
-                alert("Test Mode: Would delete " + data.count + " record(s).");
-                console.log("Would delete: " + data.count);
-                showToast(`Successfully removed ${data.count} entries`, "finish", "success");
+                alert("Test Mode: Would delete " + data.rowsAffected + " record(s).");
+                console.log("Would delete: " + data.rowsAffected);
+                showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
             } else {
                 console.log("Test data:", data); // Log the full test data for debugging
                 alert("Test Mode: " + JSON.stringify(data));

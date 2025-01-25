@@ -15,7 +15,7 @@ try {
         echo json_encode(array("status" => "error", 
                                         "message" => "Method not allowed. Only POST requests are accepted."));
     }
-    
+
     $json = file_get_contents('php://input');
     $data = json_decode($json);
 
@@ -31,7 +31,9 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
+        'status' => 'error',
         'success' => false,
+        'message' => $e->getMessage(),
         'error' => $e->getMessage()
     ]);
 }

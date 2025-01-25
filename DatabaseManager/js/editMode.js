@@ -115,8 +115,8 @@ function finalizeSave() {
 		console.log("Modified Summary", modifiedSummary);
 		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
 		// Update records in the database
-		// updateAssignmentRecord(combinationData);
-		updateAssignmentRecord(combinationData, true);
+		// updateAssignmentRecord(modifiedSummary);
+		updateAssignmentRecord(modifiedSummary, true);
 	} else {
 		showToast("No changes were made", "finish", "info");
 	}
@@ -270,7 +270,8 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                         previous: original,
 						pk_Prozess_Zuweisung: current.pkAssignmentID,
 						fk_RPA_Prozesse: current.processID,
-						fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+						fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht,
+						fk_RPA_Standort: currentRow.fk_Location,
                     });
                 }
             }
@@ -278,9 +279,9 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
     });
 
     return {
-        new: newProcesses,
-        updated: updatedProcesses,
-        removed: removedProcesses
+        insert: newProcesses,
+        update: updatedProcesses,
+        delete: removedProcesses
     };
 }
 
