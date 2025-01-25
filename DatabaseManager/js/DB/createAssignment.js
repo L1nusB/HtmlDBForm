@@ -19,8 +19,10 @@ function createAssignmentRecord(combinations, testMode = false) {
     .then(data => {
         if (data.status === "success") {
             showToast(`Successfully added ${data.rowsAffected} entries`, "finish", "success");
+        } else if (data.status === "warning") {
+            showToast(`Not all entries were added. Only ${data.rowsAffected} entries added.`, "finish", "warning");
         } else if (data.status === "test") {
-            if (data.count !== undefined) {
+            if (data.rowsAffected !== undefined) {
                 alert("Test Mode: Would add " + data.rowsAffected + " record(s).");
                 console.log("Would add: " + data.rowsAffected);
                 showToast(`Would add ${data.rowsAffected} entries`, "finish", "success");
@@ -31,7 +33,7 @@ function createAssignmentRecord(combinations, testMode = false) {
             }
         } else {
             console.error(JSON.stringify(data));
-            showToast(`Failed to create entries ${JSON.stringify(data)}`, "finish", "danger");
+            showToast(`Failed to create entries ${data.message}`, "finish", "danger");
         }
     })
     .catch(error => {

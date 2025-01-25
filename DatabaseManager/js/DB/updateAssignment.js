@@ -21,20 +21,31 @@ function updateAssignmentRecord(updateSummary, testMode = false) {
 			console.log("Data results from DB:", data);
 			if (data.status === "success") {
 				showToast(
-					`Successfully modified ${data.total} entries. ${data.inserts} insertions, 
-                    ${data.updates} updates, ${data.deletions} deletions.`,
+					`Successfully modified ${data.total} entries. ` +
+						`${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`,
 					"finish",
 					"success"
 				);
+			} else if (data.status === "warning") {
+				showToast(
+					`Not all entries were updated. Only updated ${data.total} entries.` +
+						`${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`,
+					"finish",
+					"warning"
+				);
 			} else if (data.status === "test") {
 				if (data.success) {
-					alert(`Test Mode: Would modified ${data.total} record(s). `+
-                        `${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`);
-					console.log(`Would update ${data.total} record(s). ` + 
-                        `${data.inserts} insertions,  ${data.updates} updates, ${data.deletions} deletions.`);
+					alert(
+						`Test Mode: Would modified ${data.total} record(s). ` +
+							`${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`
+					);
+					console.log(
+						`Would update ${data.total} record(s). ` +
+							`${data.inserts} insertions,  ${data.updates} updates, ${data.deletions} deletions.`
+					);
 					showToast(
-						`Successfully modified ${data.total} entries. `+
-                        `${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`,
+						`Successfully modified ${data.total} entries. ` +
+							`${data.inserts} insertions, ${data.updates} updates, ${data.deletions} deletions.`,
 						"finish",
 						"success"
 					);
@@ -45,7 +56,7 @@ function updateAssignmentRecord(updateSummary, testMode = false) {
 				}
 			} else {
 				console.error(JSON.stringify(data));
-				showToast(`Failed to update entries ${JSON.stringify(data)}`, "finish", "danger");
+				showToast(`Failed to update entries ${data.message}`, "finish", "danger");
 			}
 		})
 		.catch((error) => {

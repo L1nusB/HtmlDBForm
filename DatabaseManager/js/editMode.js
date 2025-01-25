@@ -40,7 +40,7 @@ function disableEditFields() {
 	table.$("tr").removeClass("modified-row");
 }
 
-function exitEditMode() {
+function exitEditMode(updateData = false) {
 	$("#deleteBtn").prop("disabled", false); // Enable Delete button
 	clearValidationErrors();
 	editMode = false;
@@ -48,6 +48,11 @@ function exitEditMode() {
 	toggleButtonsEdit(false);
 	table.column(-1).visible(false);
 	modifiedRows = {};
+	// Check if the data should be updated to reduce database calls
+	if (updateData) {
+		// Reloads the table with the current data of the database
+		manualReload(table);
+	}
 }
 
 function toggleButtonsEdit(deletionMode) {
@@ -104,23 +109,20 @@ function updateRowHighlight() {
 }
 
 function finalizeSave() {
-	console.log("Finalizing save");
-	console.log("Modified Rows", modifiedRows);
 	const hasChanges = Object.keys(modifiedRows).length > 0;
 	if (hasChanges) {
 		const modifiedSummary = createModifiedSummary(data, originalData, processNames, modifiedRows);
 		const numModifications = Object.values(modifiedSummary).reduce((total, arr) => {
 									return total + (Array.isArray(arr) ? arr.length : 0);
 								}, 0);
-		console.log("Modified Summary", modifiedSummary);
 		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
 		// Update records in the database
-		// updateAssignmentRecord(modifiedSummary);
-		updateAssignmentRecord(modifiedSummary, true);
+		updateAssignmentRecord(modifiedSummary);
+		// updateAssignmentRecord(modifiedSummary, true);
 	} else {
 		showToast("No changes were made", "finish", "info");
 	}
-	exitEditMode();
+	exitEditMode(true);
 }
 
 function isRowModified(rowIndex) {
@@ -217,12 +219,9 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
 	const newProcesses = [];
     const updatedProcesses = [];
     const removedProcesses = [];
-	console.log("data", data);
 	Object.entries(modifiedRows).forEach(([rowIndex, processes]) => {
-		console.log(rowIndex, processes);
         const currentRow = data[rowIndex];
         const originalRow = originalData[rowIndex];
-		console.log(currentRow);
 		const fk_RPA_Bankenuebersicht = currentRow.fk_Bankenuebersicht;
 
         processNames.forEach(processName => {
@@ -243,6 +242,8 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                 )
             };
 
+			processInfo["ProduktionsStart"] = formatDateStringToISO(processInfo["startDate"]);
+
             if (!original.checked && current.checked) {
                 // New process
                 newProcesses.push({
@@ -250,7 +251,8 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                     checked: current.checked,
                     pk_Prozess_Zuweisung: current.pkAssignmentID,
                     fk_RPA_Prozesse: current.processID,
-					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht,
+					fk_RPA_Standort: currentRow.fk_Location,
                 });
             } else if (original.checked && !current.checked) {
 				// Removed process
@@ -259,7 +261,8 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
                     checked: current.checked,
 					pk_Prozess_Zuweisung: current.pkAssignmentID,
 					fk_RPA_Prozesse: current.processID,
-					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht
+					fk_RPA_Bankenuebersicht: fk_RPA_Bankenuebersicht,
+					fk_RPA_Standort: currentRow.fk_Location,
                 });
             } else if (original.checked && current.checked) {
 				// If checked is true in both, directly compare the objects
@@ -286,7 +289,6 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
 }
 
 function handleSave() {
-	console.log("Start save");
 	clearValidationErrors();
 	if (Object.keys(modifiedRows).length > 0) {
 		if (!validate()) {
@@ -313,7 +315,6 @@ function handleCancel() {
 }
 
 function confirmSave() {
-	console.log("Confirmed save");
 	$("#saveModal").modal("hide");
 	finalizeSave();
 }

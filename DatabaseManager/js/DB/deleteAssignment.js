@@ -19,6 +19,8 @@ function deleteAssignmentRecord(combinations, testMode = false) {
     .then(data => {
         if (data.status === "success") {
             showToast(`Successfully removed ${data.rowsAffected} entries`, "finish", "success");
+        } else if (data.status === "warning") {
+            showToast(`Not all entries were removed. Only removed ${data.rowsAffected} entries.`, "finish", "warning");
         } else if (data.status === "test") {
             if (data.count !== undefined) {
                 alert("Test Mode: Would delete " + data.rowsAffected + " record(s).");
@@ -31,7 +33,7 @@ function deleteAssignmentRecord(combinations, testMode = false) {
             }
         } else {
             console.error(JSON.stringify(data));
-            showToast(`Failed to remove entries ${JSON.stringify(data)}`, "finish", "danger");
+            showToast(`Failed to remove entries ${data.message}`, "finish", "danger");
         }
     })
     .catch(error => {

@@ -4,7 +4,7 @@ require_once 'db_config.php';
 class AssignmentOperations
 {
     // Create new assignment
-    public static function createAssignment($data)
+    public static function createAssignment($data, $keepOpen = false)
     {
         try {
             $conn = Database::getConnection();
@@ -87,10 +87,17 @@ class AssignmentOperations
                     $rowsAffected = 0;
                 }
 
+                $allProcessed = $rowsAffected === count($data->combinations);
+                if (!$allProcessed) {
+                    $message = "Not all records were inserted.";
+                } else {
+                    $message = "Records created/updated successfully.";
+                }
+
                 $result = array(
                     "success" => true,
-                    "status" => "success",
-                    "message" => "Records created/updated successfully.",
+                    "status" => $allProcessed ? "success" : "warning",
+                    "message" => $message,
                     "rowsAffected" => $rowsAffected
                 );
             }
@@ -99,13 +106,15 @@ class AssignmentOperations
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 
     // Update multiple assignments by foreign key combinations
-    public static function updateAssignments($data)
+    public static function updateAssignments($data, $keepOpen = false)
     {
         try {
             // Connection is a singleton, so we don't need to close it here
@@ -121,7 +130,7 @@ class AssignmentOperations
                 return array(
                     "success" => true,
                     "status" => "test",
-                    "message"=> "Update test successful.",
+                    "message" => "Update test successful.",
                     "rowsAffected" => count($data->combinations)
                 );
             }
@@ -144,22 +153,31 @@ class AssignmentOperations
                 }
             }
 
+            $allProcessed = $rowsAffected === count($data->combinations);
+            if (!$allProcessed) {
+                $message = "Not all records were updated.";
+            } else {
+                $message = "Records updated successfully.";
+            }
+
             return array(
                 "success" => true,
-                "status" => "success",
-                "message" => "Records updated successfully.",
+                "status" => $allProcessed ? "success" : "warning",
+                "message" => $message,
                 "rowsAffected" => $rowsAffected
             );
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 
     // Update multiple assignments by ID
-    public static function updateAssignmentsById($data)
+    public static function updateAssignmentsById($data, $keepOpen = false)
     {
         try {
             // Connection is a singleton, so we don't need to close it here
@@ -175,7 +193,7 @@ class AssignmentOperations
                 return array(
                     "success" => true,
                     "status" => "test",
-                    "message"=> "Update test successful.",
+                    "message" => "Update test successful.",
                     "rowsAffected" => count($data)
                 );
             }
@@ -184,29 +202,38 @@ class AssignmentOperations
 
             foreach ($data as $entry) {
                 if (
-                    !isset($entry->id) ||
-                    !isset($entry->startDate)
+                    !isset($entry['id']) ||
+                    !isset($entry['startDate'])
                 ) {
                     continue;
                 }
 
-                $result = self::updateAssignmentById($entry->id, $entry->startDate);
+                $result = self::updateAssignmentById($entry['id'], $entry['startDate'], $keepOpen);
                 if ($result['status'] == 'success') {
                     $rowsAffected += $result['rowsAffected'];
                 }
             }
 
+            $allProcessed = $rowsAffected === count($data);
+            if (!$allProcessed) {
+                $message = "Not all records were updated.";
+            } else {
+                $message = "Multiple Records updated successful by Id.";
+            }
+
             return array(
                 "success" => true,
-                "status" => "success",
-                "message" => "Multiple Records test updat by Id successful.",
+                "status" => $allProcessed ? "success" : "warning",
+                "message" => $message,
                 "rowsAffected" => $rowsAffected
             );
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 
@@ -230,7 +257,7 @@ class AssignmentOperations
                 return array(
                     "success" => true,
                     "status" => "test",
-                    "message"=> "Update test successful.",
+                    "message" => "Update test successful.",
                     "rowsAffected" => 1
                 );
             }
@@ -271,17 +298,18 @@ class AssignmentOperations
     }
 
     // Update existing assignment by ID
-    public static function updateAssignmentById($ids, $data, $keepOpen = false)
+    public static function updateAssignmentById($ids, $startDate, $keepOpen = false)
     {
         try {
             $conn = Database::getConnection();
 
-            if (!is_array($ids) || empty($ids)) {
-                throw new Exception("Missing or invalid IDs parameter.");
+            // Convert single ID to array if necessary
+            if (!is_array($ids)) {
+                $ids = [$ids];
             }
 
-            if (!isset($data->ProduktionsStart)) {
-                throw new Exception("Missing or invalid data parameter.");
+            if (empty($ids)) {
+                throw new Exception("Missing or invalid IDs parameter.");
             }
 
             // Check for test mode
@@ -289,13 +317,13 @@ class AssignmentOperations
                 return array(
                     "success" => true,
                     "status" => "test",
-                    "message"=> "Test update single ID successful.",
+                    "message" => "Test update single ID successful.",
                     "rowsAffected" => count($ids),
                 );
             }
 
             $idPlaceholders = implode(',', array_fill(0, count($ids), '?'));
-            $params = array_merge([$data->ProduktionsStart], $ids);
+            $params = array_merge([$startDate], $ids);
 
             $sql = "UPDATE USEAP_RPA_Prozess_Zuweisung 
                     SET ProduktionsStart = ? 
@@ -315,10 +343,17 @@ class AssignmentOperations
             $rowsAffected = sqlsrv_rows_affected($stmt);
             sqlsrv_free_stmt($stmt);
 
+            $allProcessed = $rowsAffected === count($ids);
+            if (!$allProcessed) {
+                $message = "Not all records were updated.";
+            } else {
+                $message = "Records updated successfully.";
+            }
+
             return array(
                 "success" => true,
-                "status" => "success",
-                "message" => "Records updated successfully.",
+                "status" => $allProcessed ? "success" : "warning",
+                "message" => $message,
                 "rowsAffected" => $rowsAffected
             );
         } catch (Exception $e) {
@@ -332,7 +367,7 @@ class AssignmentOperations
     }
 
     // Delete process
-    public static function deleteAssignment($data)
+    public static function deleteAssignment($data, $keepOpen = false)
     {
         try {
             $conn = Database::getConnection();
@@ -382,7 +417,7 @@ class AssignmentOperations
                     $result = array(
                         "success" => true,
                         "status" => "test",
-                        "message"=> "Test deletion successful.",
+                        "message" => "Test deletion successful.",
                         "rowsAffected" => $count,
                     );
                 }
@@ -418,19 +453,26 @@ class AssignmentOperations
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 
     // Delete process by ID
-    public static function deleteAssignmentById($ids)
+    public static function deleteAssignmentById($ids, $keepOpen = false)
     {
         try {
             $conn = Database::getConnection();
 
+            // Convert single ID to array if necessary
+            if (!is_array($ids)) {
+                $ids = [$ids];
+            }
+
             // Validate input
-            if (!is_array($ids) || empty($ids)) {
+            if (empty($ids)) {
                 throw new Exception("Missing or invalid IDs parameter.");
             }
 
@@ -442,7 +484,7 @@ class AssignmentOperations
                 // Use SELECT COUNT(*) to simulate the delete
                 $countSql = "SELECT COUNT(*) AS count FROM USEAP_RPA_Prozess_Zuweisung WHERE pk_Prozess_Zuweisung IN ($idPlaceholders)";
                 $countStmt = sqlsrv_query($conn, $countSql, $params);
-                
+
                 if ($countStmt === false) {
                     $errors = sqlsrv_errors();
                     $error_message = "Error getting count: ";
@@ -454,11 +496,11 @@ class AssignmentOperations
 
                 $row = sqlsrv_fetch_array($countStmt, SQLSRV_FETCH_ASSOC);
                 sqlsrv_free_stmt($countStmt);
-                
+
                 return array(
                     "success" => true,
                     "status" => "test",
-                    "message"=> "Test deletion by ID successful.",
+                    "message" => "Test deletion by ID successful.",
                     "rowsAffected" => $row['count'],
                 );
             }
@@ -485,12 +527,13 @@ class AssignmentOperations
                 "message" => "Records deleted successfully.",
                 "rowsAffected" => $rowsAffected
             );
-
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 }

@@ -30,31 +30,31 @@ try {
     $deletions = [];
 
     if (isset($data->updateSummary)) {
-        if (isset($data->updateSummary->insert)) {
+        if (isset($data->updateSummary->insert) && !empty($data->updateSummary->insert)) {
             // Insert requires objects not associative arrays
             // Alternatively one could use stdClass directly
             $inserts = (object)['combinations' => $data->updateSummary->insert];
         }
-        if (isset($data->updateSummary->update)) {
+        if (isset($data->updateSummary->update) && !empty($data->updateSummary->update)) {
             $updates = array_map(function ($item) {
                 return [
-                    'pk_Prozess_Zuweisung' => $item->pk_Prozess_Zuweisung,
+                    'id' => $item->pk_Prozess_Zuweisung,
                     'startDate' => $item->startDate
                 ];
             }, $data->updateSummary->update);
         }
-        if (isset($data->updateSummary->delete)) {
+        if (isset($data->updateSummary->delete) && !empty($data->updateSummary->delete)) {
             $deletions = array_map(function ($item) {
                 return $item->pk_Prozess_Zuweisung;
             }, $data->updateSummary->delete);
         }
     } else {
-        if (isset($data->insert)) {
+        if (isset($data->insert) && !empty($data->insert)) {
             // Insert requires objects not associative arrays
             // Alternatively one could use stdClass directly
             $inserts = (object)['combinations' => $data->insert];
         }
-        if (isset($data->update)) {
+        if (isset($data->update) && !empty($data->update)) {
             $updates = array_map(function ($item) {
                 return [
                     'id' => $item->pk_Prozess_Zuweisung,
@@ -62,7 +62,7 @@ try {
                 ];
             }, $data->update);
         }
-        if (isset($data->delete)) {
+        if (isset($data->delete) && !empty($data->delete)) {
             $deletions = array_map(function ($item) {
                 return $item->pk_Prozess_Zuweisung;
             }, $data->delete);
@@ -73,35 +73,45 @@ try {
     if (empty($inserts) && empty($updates) && empty($deletions)) {
         $updates = $data;
     }
-
+    $finalStatus = 'success';
     $finalResult = array('inserts' => 0, 'updates' => 0, 'deletions' => 0);
     // Handle insertions
     if (!empty($inserts)) {
-        $result = AssignmentOperations::createAssignment($inserts);
+        $result = AssignmentOperations::createAssignment($inserts, keepOpen: true);
         if (!$result['success']) {
             throw new Exception($result['message']);
+        }
+        if ($result['status'] === 'warning'){
+            $finalStatus = 'warning';
         }
         $finalResult['inserts'] = $result['rowsAffected'];
     }
     // Handle updates
     if (!empty($updates)) {
-        $result = AssignmentOperations::updateAssignmentsById($updates);
+        $result = AssignmentOperations::updateAssignmentsById($updates, true);
         if (!$result['success']) {
             throw new Exception($result['message']);
+        }
+        if ($result['status'] === 'warning'){
+            $finalStatus = 'warning';
         }
         $finalResult['updates'] = $result['rowsAffected'];
     }
     // Handle deletions
     if (!empty($deletions)) {
-        $result = AssignmentOperations::deleteAssignmentById($deletions);
+        $result = AssignmentOperations::deleteAssignmentById($deletions, true);
         if (!$result['success']) {
             throw new Exception($result['message']);
         }
+        if ($result['status'] === 'warning'){
+            $finalStatus = 'warning';
+        }
         $finalResult['deletions'] = $result['rowsAffected'];
     }
+    Database::closeConnection();
 
     $finalResult['success'] = true;
-    $finalResult['status'] = (isset($_GET['test']) && $_GET['test'] == 1) ? 'test' : 'success';
+    $finalResult['status'] = (isset($_GET['test']) && $_GET['test'] == 1) ? 'test' : $finalStatus;
     $finalResult['total'] = $finalResult['inserts'] + $finalResult['updates'] + $finalResult['deletions'];
 
     // Return success response
