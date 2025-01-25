@@ -10,7 +10,7 @@ function enterEditMode() {
 	table.draw(false);
 
 	// Clear modified rows and check initial state
-	modifiedRows.clear();
+	modifiedRows = {};
 	data.forEach((_, index) => {
 		updateModifiedState(index);
 	});
@@ -47,7 +47,7 @@ function exitEditMode() {
 	disableEditFields();
 	toggleButtonsEdit(false);
 	table.column(-1).visible(false);
-	modifiedRows.clear();
+	modifiedRows = {};
 }
 
 function toggleButtonsEdit(deletionMode) {
@@ -65,7 +65,7 @@ function toggleButtonsEdit(deletionMode) {
 function revertRow(rowIndex) {
 	if (originalData[rowIndex]) {
 		data[rowIndex] = JSON.parse(JSON.stringify(originalData[rowIndex]));
-		modifiedRows.delete(rowIndex);
+		delete modifiedRows[rowIndex];
 
 		// Redraw the row with original data but maintain checkbox state
 		const row = table.row(rowIndex);
@@ -91,8 +91,8 @@ function updateRowHighlight() {
 	table.$(".revert-btn").removeClass("active");
 
 	// Then add highlight to modified rows and activate their revert buttons
-	modifiedRows.forEach((index) => {
-		const row = table.row(index);
+	Object.entries(modifiedRows).forEach((rowIndex, processes) => {
+		const row = table.row(rowIndex);
 		$(row.node()).addClass("modified-row");
 		$(row.node()).find(".revert-btn").addClass("active");
 
@@ -128,6 +128,29 @@ function isRowModified(rowIndex) {
 	return !deepEqual(original, current);
 }
 
+function getModifiedProcesses(rowIndex) {
+	if (!originalData) return false;
+
+	const original = originalData[rowIndex];
+	const current = data[rowIndex];
+	let modifiedProcesses = [];
+	processNames.forEach((process) => {
+		if (!deepEqual(original[process], current[process])) {
+			modifiedProcesses.push(process);
+		}
+	});
+	return modifiedProcesses;
+}
+
+function updateModifiedState(rowIndex) {
+	if (isRowModified(rowIndex)) {
+		modifiedRows[rowIndex] = getModifiedProcesses(rowIndex);
+	} else {
+		delete modifiedRows[rowIndex];
+	}
+	updateRowHighlight();
+}
+
 function toggleCheckbox(checkbox) {
 	if (editMode) {
 		const rowIndex = checkbox.data("row");
@@ -148,43 +171,38 @@ function updateDateInput(dateInput) {
 	}
 }
 
-function updateModifiedState(rowIndex) {
-	if (isRowModified(rowIndex)) {
-		modifiedRows.add(rowIndex);
-	} else {
-		modifiedRows.delete(rowIndex);
-	}
-	updateRowHighlight();
-}
-
 function clearValidationErrors() {
-	$('.process-date-input').removeClass('is-invalid');
+	$(".process-date-input").removeClass("is-invalid");
 }
 
 function validate() {
 	clearValidationErrors();
 	let isValid = true;
-	modifiedRows.forEach((rowIndex) => {
+	Object.entries(modifiedRows).forEach((rowIndex, processes) => {
+		console.log(rowIndex, processes);
 		// Check all checked checkboxes have valid dates
 		const rowNode = table.row(rowIndex).node();
 
 		// Find all div containers in this row that have a checked checkbox
-		const dateInputs = $(rowNode).find('div.d-flex').filter(function() {
-			// Find the checkbox within this div and check if it's checked
-			return $(this).find('.process-checkbox').prop('checked');
-		}).find('.process-date-input');
+		const dateInputs = $(rowNode)
+			.find("div.d-flex")
+			.filter(function () {
+				// Find the checkbox within this div and check if it's checked
+				return $(this).find(".process-checkbox").prop("checked");
+			})
+			.find(".process-date-input");
 
 		// Process each date input
-		dateInputs.each(function() {
+		dateInputs.each(function () {
 			const dateInput = $(this);
 			const dateValue = dateInput.val();
-			
+
 			// Check if the date is empty or invalid
-			if (!dateValue || dateValue.trim() === '') {
-				dateInput.addClass('is-invalid');
+			if (!dateValue || dateValue.trim() === "") {
+				dateInput.addClass("is-invalid");
 				isValid = false;
 			} else {
-				dateInput.removeClass('is-invalid');
+				dateInput.removeClass("is-invalid");
 			}
 		});
 	});
@@ -256,7 +274,7 @@ function createModifiedSummary(data, originalData, processNames, modifiedRows) {
 
 function handleSave() {
 	clearValidationErrors();
-	if (modifiedRows.size > 0) {
+	if (Object.keys(modifiedRows).length > 0) {
 		if (!validate()) {
 			return;
 		}
@@ -267,7 +285,7 @@ function handleSave() {
 }
 
 function handleCancel() {
-	if (modifiedRows.size > 0) {
+	if (Object.keys(modifiedRows).length > 0) {
 		$("#cancelModal").modal("show");
 	} else {
 		data = JSON.parse(JSON.stringify(originalData));

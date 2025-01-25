@@ -10,30 +10,27 @@ try {
     // Get database connection
     $conn = Database::getConnection();
 
-    // Query to fetch location (Standort) data
-    $query = "SELECT pk_RPA_Bankenuebersicht, RZBK, Name FROM USEAP_RPA_Bankenuebersicht";
+    // Query to fetch data from the view
+    $query = "SELECT pk_RPA_Prozesse, Prozessname FROM USEAP_RPA_Prozesse";
     $result = sqlsrv_query($conn, $query);
+
     if (!$result) {
         throw new Exception("Query failed: " . print_r(sqlsrv_errors(), true));
     }
 
-    $instituteData = array();
+    $data = array();
+    $prozessnameSet = array();
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-        $instituteData[] = $row;
+        $data[$row['Prozessname']] = $row['pk_RPA_Prozesse'];
+        $prozessnameSet[] = $row['Prozessname'];
     }
-    $instituteMapping = [];
-    foreach ($instituteData as $row) {
-        $pk = $row['pk_RPA_Bankenuebersicht'];
-        $instituteMapping[$pk] = [
-            'RZBK' => $row['RZBK'],
-            'Name' => $row['Name'],
-        ];
-    }
+
     sqlsrv_free_stmt($result);
 
-    // Pass the mapping to JavaScript
+    // Pass the mapping and set to JavaScript
     echo "<script>
-            const instituteMapping = " . json_encode($instituteMapping) . ";
+            const processMapping = " . json_encode($data) . ";
+            const processNames = " . json_encode(array_values(array_unique($prozessnameSet))) . ";
         </script>";
 } catch (Exception $e) {
     http_response_code(500);

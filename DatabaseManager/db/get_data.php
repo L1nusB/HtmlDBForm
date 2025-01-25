@@ -20,7 +20,8 @@ try {
             Prozessname, 
             ProduktionsStart,
             fk_RPA_Bankenuebersicht,
-            fk_RPA_Standort
+            fk_RPA_Standort,
+            fk_RPA_Prozesse
         FROM 
             USEAP_RPA_ViewProzessUebersicht
         ORDER BY 
