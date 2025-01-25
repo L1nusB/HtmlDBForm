@@ -41,20 +41,6 @@ function resetEntryForm() {
 function validateEntryForm() {
 	let isValid = true;
 
-	// if (!$("#newEntryRZBK").val().trim()) {
-	// 	$("#newEntryRZBK").addClass("is-invalid");
-	// 	isValid = false;
-	// } else {
-	// 	$("#newEntryRZBK").removeClass("is-invalid");
-	// }
-
-	// if (!$("#newEntryName").val().trim()) {
-	// 	$("#newEntryName").addClass("is-invalid");
-	// 	isValid = false;
-	// } else {
-	// 	$("#newEntryName").removeClass("is-invalid");
-	// }
-
 	if (!$("#newEntryInstitute").val().trim()) {
 		$("#newEntryInstitute").addClass("is-invalid");
 		isValid = false;
@@ -168,7 +154,6 @@ function addToTempEntries() {
         tempEntries.push(entry);
     });
 
-    console.log(tempEntries);
     updateTempEntriesTable();
     resetEntryForm();
 }
@@ -198,26 +183,26 @@ function saveAddedEntries() {
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
 	tempEntries.forEach((entry) => {
-		formattedEntry = {
+		const formattedEntry = {
 			RZBK: Number(entry.rzbk),
 			Name: entry.name,
+			Standort: locationMapping[entry.location],
 			fk_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
-			...processNames.reduce(
-				(acc, str) => ({
-					...acc,
-					[str]: {
-						checked: entry[str.toLowerCase()],
-						startDate: entry[`${str.toLowerCase()}_date`] == "Invalid Date" ? "" : entry[`${str.toLowerCase()}_date`],
-					},
-				}),
-				{}
-			),
+			fk_Location: entry.location,
+			...processNames.reduce((acc, process) => {
+				const processKey = process.toLowerCase();
+				acc[process] = {
+					checked: entry.processes[processKey]?.checked || false,
+					startDate: entry.processes[processKey]?.startDate || ''
+				};
+				return acc;
+			}, {})
 		};
 		console.log(formattedEntry);
 		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
 		insertSorted(data, formattedEntry);
-		// data.push(formattedEntry);
 	});
+
 	console.log(data);
 
 	// Refresh the DataTable

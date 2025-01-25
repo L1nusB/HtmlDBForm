@@ -1,34 +1,3 @@
-// function prepareDatabaseData(json) {
-//     const groupedData = {};
-//     json.forEach(item => {
-//         const key = `${item.fk_RPA_Bankenuebersicht}`;
-//         if (!groupedData[key]) {
-//             groupedData[key] = {
-//                 RZBK: item.RZBK,
-//                 Name: item.Name,
-//                 processes: {},
-//                 Standort: locationAssignment[key] || 'unknown'
-//             };
-//         }
-//         groupedData[key].processes[item.Prozessname] = item.ProduktionsStart || null;
-//     });
-
-//     return Object.values(groupedData).map(row => {
-//         const newRow = {
-//             RZBK: row.RZBK,
-//             Name: row.Name,
-//             Standort: row.Standort,
-//         };
-//         processNames.forEach(process => {
-//             newRow[process] = {
-//                 checked: row.processes[process] ? true : false,
-//                 startDate: row.processes[process] || ''
-//             };
-//         });
-//         return newRow;
-//     });
-// }
-
 function prepareDatabaseData(json) {
     // First, group by combination of bank and location
     const groupedData = {};
