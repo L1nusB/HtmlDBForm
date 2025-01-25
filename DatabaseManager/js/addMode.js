@@ -177,33 +177,47 @@ function saveAddedEntries() {
 		return;
 	}
 
-	console.log(tempEntries);
-
 	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
 	tempEntries.forEach((entry) => {
-		const formattedEntry = {
-			RZBK: Number(entry.rzbk),
-			Name: entry.name,
-			Standort: locationMapping[entry.location],
-			fk_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
-			fk_Location: entry.location,
-			...processNames.reduce((acc, process) => {
-				const processKey = process.toLowerCase();
-				acc[process] = {
-					checked: entry.processes[processKey]?.checked || false,
-					startDate: entry.processes[processKey]?.startDate || ''
-				};
-				return acc;
-			}, {})
-		};
-		console.log(formattedEntry);
-		// Insert the new entry into the data array at the correct position to preserve ordering based on RZBK
-		insertSorted(data, formattedEntry);
-	});
+		// Check if entry already exists and update it otherwise add it
+		const existingEntryIndex = data.findIndex(
+			(item) => item.fk_Bankenuebersicht === entry.fk_RPA_Bankenuebersicht && item.fk_Location === entry.location
+		);
 
-	console.log(data);
+		if (existingEntryIndex !== -1) {
+			// Update existing entry
+			const existingEntry = data[existingEntryIndex];
+			processNames.forEach((process) => {
+				const processKey = process.toLowerCase();
+				if (entry.processes[processKey]) {
+					existingEntry[process] = {
+						checked: entry.processes[processKey].checked,
+						startDate: entry.processes[processKey].startDate
+					};
+				}
+			});
+		} else {
+			// Add new entry
+			const formattedEntry = {
+				RZBK: Number(entry.rzbk),
+				Name: entry.name,
+				Standort: locationMapping[entry.location],
+				fk_Bankenuebersicht: entry.fk_RPA_Bankenuebersicht,
+				fk_Location: entry.location,
+				...processNames.reduce((acc, process) => {
+					const processKey = process.toLowerCase();
+					acc[process] = {
+						checked: entry.processes[processKey]?.checked || false,
+						startDate: entry.processes[processKey]?.startDate || ''
+					};
+					return acc;
+				}, {})
+			};
+			insertSorted(data, formattedEntry);
+		}
+	});
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();
