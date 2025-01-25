@@ -6,6 +6,7 @@ function generateAddModalTempTable() {
                         <tr>
                             <th>RZBK</th>
                             <th>Name</th>
+                            <th>Standort</th>
                             ${processNames.map(col => `<th class="text-center">${col}</th>`).join('')}
                             <th class="text-center">Action</th>
                         </tr>

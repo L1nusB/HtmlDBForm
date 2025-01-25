@@ -97,8 +97,8 @@ function updateTempEntriesTable() {
 				(col) => `
             <td class="text-center">
                 <i data-bs-toggle="tooltip" title="${
-									entry[col.toLowerCase()] ? entry[`${col.toLowerCase()}_date`] + " ("+resolveLocation(entry[`${col.toLowerCase()}_location`])+")" : ""
-								}" class="bi ${entry[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
+									entry.processes[col.toLowerCase()] ? entry.processes[col.toLowerCase()].startDate : ""
+								}" class="bi ${entry.processes[col.toLowerCase()] ? "bi-check-lg text-success" : "bi-x-lg text-danger"}"></i>
             </td>
         `
 			)
@@ -108,6 +108,7 @@ function updateTempEntriesTable() {
             <tr>
                 <td>${entry.rzbk}</td>
                 <td>${entry.name}</td>
+                <td>${resolveLocation(entry.location)}</td>
                 ${processColumnsHTML}
                 <td class="text-center">
                     <button class="btn btn-link text-danger p-0 remove-temp-entry" data-index="${index}">
