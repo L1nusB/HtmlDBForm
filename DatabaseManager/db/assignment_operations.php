@@ -57,7 +57,7 @@ class AssignmentOperations
                         $params[] = $combination->ProduktionsStart;
                     } else {
                         // Update existing record
-                        self::updateAssignment($combination);
+                        self::updateAssignment($combination, true);
                     }
                 }
 
@@ -101,7 +101,7 @@ class AssignmentOperations
     }
 
     // Update existing assignment
-    public static function updateAssignment($combination)
+    public static function updateAssignment($combination, $keepOpen = false)
     {
         try {
             $conn = Database::getConnection();
@@ -141,8 +141,10 @@ class AssignmentOperations
         } catch (Exception $e) {
             throw $e;
         } finally {
-            // Close the connection
-            Database::closeConnection();
+            if (!$keepOpen) {
+                // Close the connection
+                Database::closeConnection();
+            }
         }
     }
 

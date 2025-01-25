@@ -85,7 +85,8 @@ function processDeletion() {
 			)
 			.filter((combination) => combination !== null);
 		// Delete records from the database
-		deleteRecord(combinationData, true);
+		deleteRecord(combinationData);
+		// deleteRecord(combinationData, true);
 
 		// Remove the rows from the data array (local)
 		rowIndices.forEach((index) => {
