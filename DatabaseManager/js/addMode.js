@@ -1,7 +1,6 @@
 function enterAddMode() {
 	tempEntries = [];
 	data = table.rows().data().toArray();
-	console.log(data);
 	resetEntryForm();
 	updateTempEntriesTable();
 	$("#addEntriesModal").modal("show");
@@ -178,8 +177,6 @@ function saveAddedEntries() {
 		return;
 	}
 
-	console.log(tempEntries);
-
 	// Send to database
 	showToast(`Start adding ${tempEntries.length} new entries to database`, "start", "info");
 
@@ -242,7 +239,6 @@ function saveAddedEntries() {
 	// createAssignmentRecord(combinations);
 	// createAssignmentRecord(combinations, true);
 	createAssignmentRecord(combinations, testMode);
-	console.log(data);
 
 	// Refresh the DataTable
 	table.clear().rows.add(data).draw();

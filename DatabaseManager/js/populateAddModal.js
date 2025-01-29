@@ -78,11 +78,14 @@ function generateLocationSelector() {
 }
 
 function generateInstituteSelector() {
+    const sortedInstitutes = Object.entries(instituteMapping)
+        .sort((a, b) => Number(a[1].RZBK) - Number(b[1].RZBK));
+
     return `<div id="instituteSelector" class="col-12">
                 <label for="newEntryInstitute" class="form-label">Institut</label>
                 <select class="form-select" id="newEntryInstitute" required>
                     <option value="" selected disabled hidden>Institut wählen...</option>
-                    ${Object.entries(instituteMapping).map(([id, inst]) => 
+                    ${sortedInstitutes.map(([id, inst]) => 
                         `<option value="${id}" data-rzbk="${inst.RZBK}">${inst.RZBK} - ${inst.Name}</option>`
                     ).join('')}
                 </select>
