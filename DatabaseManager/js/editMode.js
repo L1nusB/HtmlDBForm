@@ -117,8 +117,9 @@ function finalizeSave() {
 								}, 0);
 		showToast(`Verarbeite ${numModifications} Änderungen`, "start", "info");
 		// Update records in the database
-		updateAssignmentRecord(modifiedSummary);
+		// updateAssignmentRecord(modifiedSummary);
 		// updateAssignmentRecord(modifiedSummary, true);
+		updateAssignmentRecord(modifiedSummary, testMode);
 	} else {
 		showToast("No changes were made", "finish", "info");
 	}

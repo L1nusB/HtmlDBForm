@@ -109,7 +109,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        Are you sure you want to delete this institute?
+                        <p>Are you sure you want to delete institute <strong><span id="deleteInstituteRZBK"></span></strong>?</p>
+                        <div id="assignedProcessesWarning" class="alert alert-warning d-none">
+                            <p>This institute has the following processes assigned:</p>
+                            <p id="assignedProcessesList" class="mb-2 fw-bold"></p>
+                            <hr>
+                            <p class="mb-0">These process assignments will also be deleted.</p>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -221,8 +227,33 @@
             $('#instituteTable').on('click', '.delete-btn', function() {
                 const row = table.row($(this).closest('tr')).data();
                 editingId = row.pk_RPA_Bankenuebersicht;
-                deletingRZBK = row.RZBK;  // Store RZBK for message
-                $('#deleteModal').modal('show');
+                deletingRZBK = row.RZBK;
+
+                // Check for assigned processes before showing delete modal
+                $.ajax({
+                    url: './db/check_assigned_processes.php',
+                    method: 'POST',
+                    data: JSON.stringify({ id: editingId }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#deleteInstituteRZBK').text(deletingRZBK);
+                        if (response.hasProcesses) {
+                            $('#assignedProcessesList').text(response.processes.join(', '));
+                            $('#assignedProcessesWarning').removeClass('d-none');
+                        } else {
+                            $('#assignedProcessesWarning').addClass('d-none');
+                        }
+                        $('#deleteModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking assigned processes', 'finish', 'error');
+                    }
+                });
+            });
+
+            // Reset warning when modal is hidden
+            $('#deleteModal').on('hidden.bs.modal', function() {
+                $('#assignedProcessesWarning').addClass('d-none');
             });
 
             // Save Institute

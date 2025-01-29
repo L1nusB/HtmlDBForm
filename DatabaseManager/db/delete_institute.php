@@ -5,30 +5,52 @@ require_once 'db_config.php';
 try {
     $conn = Database::getConnection();
     
-    // Get JSON data
     $data = json_decode(file_get_contents('php://input'));
 
     if (!isset($data->id)) {
         throw new Exception("Missing ID parameter");
     }
 
-    $query = "DELETE FROM USEAP_RPA_Bankenuebersicht WHERE pk_RPA_Bankenuebersicht = ?";
-    $stmt = sqlsrv_prepare($conn, $query, array(&$data->id));
-
-    if (!$stmt) {
-        throw new Exception("Failed to prepare statement");
+    // Start transaction
+    if (sqlsrv_begin_transaction($conn) === false) {
+        throw new Exception("Could not begin transaction");
     }
 
-    if (!sqlsrv_execute($stmt)) {
-        throw new Exception("Failed to execute statement");
+    // First delete process assignments
+    $deleteAssignments = "DELETE FROM USEAP_RPA_Prozess_Zuweisung WHERE fk_RPA_Bankenuebersicht = ?";
+    $stmt = sqlsrv_prepare($conn, $deleteAssignments, array($data->id));
+
+    if (!$stmt || !sqlsrv_execute($stmt)) {
+        throw new Exception("Failed to delete process assignments");
     }
 
-    echo json_encode(array(
+    // Then delete the institute
+    $deleteInstitute = "DELETE FROM USEAP_RPA_Bankenuebersicht WHERE pk_RPA_Bankenuebersicht = ?";
+    $stmt = sqlsrv_prepare($conn, $deleteInstitute, array($data->id));
+
+    if (!$stmt || !sqlsrv_execute($stmt)) {
+        throw new Exception("Failed to delete institute");
+    }
+
+    // Commit transaction
+    sqlsrv_commit($conn);
+
+    echo json_encode([
         "status" => "success",
         "success" => true,
         "message" => "Institute " . $data->RZBK . " deleted successfully"
-    ));
+    ]);
+
 } catch (Exception $e) {
-    echo json_encode(array("status" => "error", "message" => $e->getMessage()));
+    // Rollback transaction on error
+    if (isset($conn) && sqlsrv_begin_transaction($conn) !== false) {
+        sqlsrv_rollback($conn);
+    }
+    echo json_encode([
+        "status" => "error", 
+        "message" => $e->getMessage()
+    ]);
+} finally {
+    Database::closeConnection();
 }
 ?>

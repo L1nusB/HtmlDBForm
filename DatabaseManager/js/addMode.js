@@ -240,7 +240,8 @@ function saveAddedEntries() {
 
 	// Send combinations to the server
 	// createAssignmentRecord(combinations);
-	createAssignmentRecord(combinations, true);
+	// createAssignmentRecord(combinations, true);
+	createAssignmentRecord(combinations, testMode);
 	console.log(data);
 
 	// Refresh the DataTable
