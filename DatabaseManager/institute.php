@@ -55,6 +55,9 @@
                             <div class="mb-3">
                                 <label for="rzbk" class="form-label">RZBK</label>
                                 <input type="text" class="form-control" id="rzbk" required>
+                                <div class="invalid-feedback">
+                                    Please provide an RZBK.
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name</label>
@@ -63,11 +66,35 @@
                                     Please provide an institute name.
                                 </div>
                             </div>
+                            <!-- Add duplicate error message container -->
+                            <div id="duplicateError" class="alert alert-danger d-none">
+                                This exact combination of RZBK and Name already exists.
+                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-primary" id="saveInstituteBtn">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RZBK Duplicate Confirmation Modal -->
+        <div class="modal fade" id="duplicateConfirmModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Potential Duplicate RZBK</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>An institute with RZBK <span id="duplicateRZBK"></span> already exists with name: <span id="existingName"></span></p>
+                        <p>Do you want to create another entry with the same RZBK but different name?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmDuplicateBtn">Create Anyway</button>
                     </div>
                 </div>
             </div>
@@ -107,6 +134,7 @@
         let table;
         let editingId = null;
         let deletingRZBK = null;  // Store RZBK for deletion message
+        let pendingSave = null;  // Store pending save data for duplicate confirmation
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -178,6 +206,15 @@
             // Handle modal hidden event (triggers for both X and Cancel button)
             $('#instituteModal').on('hidden.bs.modal', function() {
                 $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+            });
+
+            // Also clear error state when inputs change
+            $('#rzbk, #name').on('input', function() {
+                $(this).removeClass('is-invalid');
+                if (!$('.is-invalid').length) {
+                    $('#duplicateError').addClass('d-none');
+                }
             });
 
             // Delete button click
@@ -190,25 +227,81 @@
 
             // Save Institute
             $('#saveInstituteBtn').click(function() {
-                // Reset validation state
+                // Reset validation and error states
                 $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+                let isValid = true;
                 
-                // Validate name field
+                // Validate both fields
+                const rzbkField = $('#rzbk');
                 const nameField = $('#name');
+
+                if (!rzbkField.val().trim()) {
+                    rzbkField.addClass('is-invalid');
+                    isValid = false;
+                }
+                
                 if (!nameField.val().trim()) {
                     nameField.addClass('is-invalid');
-                    return;
+                    isValid = false;
                 }
 
+                if (!isValid) return;
+
                 const data = {
-                    RZBK: $('#rzbk').val(),
+                    RZBK: rzbkField.val().trim(),
                     Name: nameField.val().trim(),
                     id: editingId
                 };
 
+                // If editing, bypass duplicate check
+                if (editingId) {
+                    performSave(data);
+                    return;
+                }
+
+                // For new entries, check for duplicates first
+                $.ajax({
+                    url: './db/check_duplicate.php',
+                    method: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.exists) {
+                            if (response.exactMatch) {
+                                // Show duplicate error and highlight fields
+                                $('#duplicateError').removeClass('d-none');
+                                rzbkField.addClass('is-invalid');
+                                nameField.addClass('is-invalid');
+                            } else {
+                                // Show confirmation modal for RZBK duplicate
+                                $('#duplicateRZBK').text(data.RZBK);
+                                $('#existingName').text(response.existingName);
+                                pendingSave = data;
+                                $('#duplicateConfirmModal').modal('show');
+                            }
+                        } else {
+                            performSave(data);
+                        }
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking for duplicates', 'finish', 'error');
+                    }
+                });
+            });
+
+            // Handle duplicate confirmation
+            $('#confirmDuplicateBtn').click(function() {
+                if (pendingSave) {
+                    performSave(pendingSave);
+                    $('#duplicateConfirmModal').modal('hide');
+                }
+            });
+
+            function performSave(data) {
                 $.ajax({
                     url: './db/save_institute.php',
-                    method: editingId ? 'PUT' : 'POST',
+                    method: data.id ? 'PUT' : 'POST',
                     data: JSON.stringify(data),
                     contentType: 'application/json',
                     success: function(response) {
@@ -220,7 +313,7 @@
                         showToast('Error saving institute', 'finish', 'error');
                     }
                 });
-            });
+            }
 
             // Confirm Delete
             $('#confirmDeleteBtn').click(function() {
