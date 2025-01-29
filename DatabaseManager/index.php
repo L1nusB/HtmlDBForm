@@ -11,7 +11,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
@@ -86,11 +86,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.js"></script>
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
 
     <script src="./js/utils.js"></script>
     <script src="./js/dataOverview.js"></script>
@@ -99,8 +98,8 @@
     <script src="./js/DB/createAssignment.js"></script>
     <script src="./js/DB/deleteAssignment.js"></script>
     <script src="./js/DB/updateAssignment.js"></script>
-    
-    
+
+
     <script src="./js/addMode.js"></script>
     <script src="./js/deleteMode.js"></script>
     <script src="./js/editMode.js"></script>
@@ -238,6 +237,16 @@
                         ],
                         // Do not allow ordering as it messes up in editing and deleting.
                         ordering: false,
+                        dom: 'Bfrtip',
+                        buttons: [
+                            {
+                                text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
+                                action: function (e, dt, node, config) {
+                                    dt.ajax.reload();
+                                },
+                                className: 'btn btn-outline-secondary'
+                            }
+                        ],
                     });
                     // Enable the buttons after the table is initialized
                     enableButtons();

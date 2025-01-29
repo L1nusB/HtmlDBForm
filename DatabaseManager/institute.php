@@ -10,7 +10,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.css" rel="stylesheet">
     <!-- Custom styles -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -131,8 +131,7 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- DataTables -->
-    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.js"></script>
     <!-- Utils -->
     <script src="./js/utils.js"></script>
 
