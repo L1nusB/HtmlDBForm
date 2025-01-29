@@ -24,6 +24,9 @@
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
         <div class="action-buttons btn-group">
+            <a href="./institute.php" class="btn btn-outline-primary me-2 rounded">
+                <i class="bi bi-building"></i> Manage Institutes
+            </a>
             <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
             </button>

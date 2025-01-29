@@ -19,6 +19,9 @@
     <div class="container mt-5">
         <h2>Institute Management</h2>
         <div class="action-buttons mb-3">
+            <a href="./index.php" class="btn btn-outline-primary me-2">
+                <i class="bi bi-table"></i> Process Overview
+            </a>
             <button id="addInstituteBtn" class="btn btn-success">
                 <i class="bi bi-plus-lg"></i> Add Institute
             </button>
