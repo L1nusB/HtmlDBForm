@@ -50,7 +50,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="instituteForm">
+                        <form id="instituteForm" novalidate>
                             <input type="hidden" id="instituteId">
                             <div class="mb-3">
                                 <label for="rzbk" class="form-label">RZBK</label>
@@ -59,6 +59,9 @@
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name</label>
                                 <input type="text" class="form-control" id="name" required>
+                                <div class="invalid-feedback">
+                                    Please provide an institute name.
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -155,6 +158,7 @@
                 editingId = null;
                 $('#modalTitle').text('Add Institute');
                 $('#instituteForm')[0].reset();
+                $('#rzbk').prop('readonly', false).removeClass('bg-light');  // Remove disabled appearance
                 $('#instituteModal').modal('show');
             });
 
@@ -165,9 +169,14 @@
                 const row = table.row($(this).closest('tr')).data();
                 
                 $('#modalTitle').text('Edit Institute');
-                $('#rzbk').val(row.RZBK);
+                $('#rzbk').val(row.RZBK).prop('readonly', true).addClass('bg-light');  // Add disabled appearance
                 $('#name').val(row.Name);
                 $('#instituteModal').modal('show');
+            });
+
+            // Handle modal hidden event (triggers for both X and Cancel button)
+            $('#instituteModal').on('hidden.bs.modal', function() {
+                $('.is-invalid').removeClass('is-invalid');
             });
 
             // Delete button click
@@ -178,9 +187,19 @@
 
             // Save Institute
             $('#saveInstituteBtn').click(function() {
+                // Reset validation state
+                $('.is-invalid').removeClass('is-invalid');
+                
+                // Validate name field
+                const nameField = $('#name');
+                if (!nameField.val().trim()) {
+                    nameField.addClass('is-invalid');
+                    return;
+                }
+
                 const data = {
                     RZBK: $('#rzbk').val(),
-                    Name: $('#name').val(),
+                    Name: nameField.val().trim(),
                     id: editingId
                 };
 

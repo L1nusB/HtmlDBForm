@@ -28,7 +28,7 @@ try {
         throw new Exception("Query failed: " . print_r(sqlsrv_errors(), true));
     }
 
-    $message = isset($data->id) ? "Institute updated successfully" : "Institute added successfully";
+    $message = isset($data->id) ? "Institute ".$data->RZBK." updated successfully" : "Institute ".$data->RZBK." added successfully";
     echo json_encode([
         "success" => true,
         "status" => "success",
