@@ -237,16 +237,16 @@
                         ],
                         // Do not allow ordering as it messes up in editing and deleting.
                         ordering: false,
-                        dom: 'Bfrtip',
-                        buttons: [
-                            {
-                                text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
-                                action: function (e, dt, node, config) {
-                                    dt.ajax.reload();
-                                },
-                                className: 'btn btn-outline-secondary'
-                            }
-                        ],
+                        layout: {
+                            topStart: 'pageLength',
+                            topEnd: ['buttons','search'],
+                        },
+                        buttons: [{
+                            text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
+                            action: function(e, dt, node, config) {
+                                dt.ajax.reload();
+                            },
+                        }],
                     });
                     // Enable the buttons after the table is initialized
                     enableButtons();
