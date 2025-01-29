@@ -28,7 +28,8 @@
                 <tr>
                     <th>RZBK</th>
                     <th>Name</th>
-                    <th>Actions</th>
+                    <th>Modify</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -113,16 +114,24 @@
                     {
                         data: null,
                         orderable: false,
+                        className: 'text-center',
                         render: function(data, type, row) {
                             return `
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-primary edit-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger delete-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                                <button class="btn btn-sm btn-primary edit-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            `;
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            return `
+                                <button class="btn btn-sm btn-danger delete-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             `;
                         }
                     }
