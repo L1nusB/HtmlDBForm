@@ -23,19 +23,22 @@
                 <i class="bi bi-plus-lg"></i> Add Institute
             </button>
         </div>
-        <table id="instituteTable" class="table table-striped">
-            <thead>
-                <tr>
-                    <th>RZBK</th>
-                    <th>Name</th>
-                    <th>Modify</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be populated by DataTables -->
-            </tbody>
-        </table>
+        <!-- Add a div with max-width to constrain table width -->
+        <div style="max-width: 800px;">
+            <table id="instituteTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>RZBK</th>
+                        <th>Name</th>
+                        <th>Modify</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated by DataTables -->
+                </tbody>
+            </table>
+        </div>
         <?php include './toast/toast.html'; ?>
 
         <!-- Add/Edit Institute Modal -->
@@ -109,12 +112,19 @@
                     dataSrc: ''
                 },
                 columns: [
-                    { data: 'RZBK' },
-                    { data: 'Name' },
+                    { 
+                        data: 'RZBK',
+                        width: '80px'  // RZBK is max 4 digits, so this is plenty
+                    },
+                    { 
+                        data: 'Name',
+                        width: '400px'  // Give Name column fixed width to prevent wrapping
+                    },
                     {
                         data: null,
                         orderable: false,
                         className: 'text-center',
+                        width: '50px',  // Set fixed width for modify column
                         render: function(data, type, row) {
                             return `
                                 <button class="btn btn-sm btn-primary edit-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
@@ -127,6 +137,7 @@
                         data: null,
                         orderable: false,
                         className: 'text-center',
+                        width: '50px',  // Set fixed width for delete column
                         render: function(data, type, row) {
                             return `
                                 <button class="btn btn-sm btn-danger delete-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
