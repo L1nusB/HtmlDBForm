@@ -23,7 +23,11 @@ try {
         throw new Exception("Failed to execute statement");
     }
 
-    echo json_encode(array("status" => "success"));
+    echo json_encode(array(
+        "status" => "success",
+        "success" => true,
+        "message" => "Institute " . $data->RZBK . " deleted successfully"
+    ));
 } catch (Exception $e) {
     echo json_encode(array("status" => "error", "message" => $e->getMessage()));
 }

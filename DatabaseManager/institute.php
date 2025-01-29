@@ -106,6 +106,7 @@
     <script>
         let table;
         let editingId = null;
+        let deletingRZBK = null;  // Store RZBK for deletion message
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -181,7 +182,9 @@
 
             // Delete button click
             $('#instituteTable').on('click', '.delete-btn', function() {
-                editingId = $(this).data('id');
+                const row = table.row($(this).closest('tr')).data();
+                editingId = row.pk_RPA_Bankenuebersicht;
+                deletingRZBK = row.RZBK;  // Store RZBK for message
                 $('#deleteModal').modal('show');
             });
 
@@ -226,12 +229,15 @@
                 $.ajax({
                     url: './db/delete_institute.php',
                     method: 'DELETE',
-                    data: JSON.stringify({ id: editingId }),
+                    data: JSON.stringify({ 
+                        id: editingId,
+                        RZBK: deletingRZBK  // Pass RZBK to server
+                    }),
                     contentType: 'application/json',
                     success: function(response) {
                         $('#deleteModal').modal('hide');
                         table.ajax.reload();
-                        showToast(response.message, 'finish', response.status);
+                        showToast(response.message || `Institute ${deletingRZBK} deleted successfully`, 'finish', response.status);
                     },
                     error: function(xhr) {
                         showToast('Error deleting institute', 'finish', 'error');
