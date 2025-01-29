@@ -11,7 +11,7 @@ try {
     $conn = Database::getConnection();
 
     // Query to fetch location (Standort) data
-    $query = "SELECT pk_RPA_Bankenuebersicht, RZBK, Name FROM USEAP_RPA_Bankenuebersicht";
+    $query = "SELECT pk_RPA_Bankenuebersicht, RZBK, Name FROM USEAP_RPA_Bankenuebersicht ORDER BY RZBK ASC";
     $result = sqlsrv_query($conn, $query);
     if (!$result) {
         throw new Exception("Query failed: " . print_r(sqlsrv_errors(), true));
