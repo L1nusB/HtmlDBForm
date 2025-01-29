@@ -10,7 +10,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.css" rel="stylesheet">
     <!-- Custom styles -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -134,15 +134,17 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- DataTables -->
-    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.js"></script>
     <!-- Utils -->
     <script src="./js/utils.js"></script>
 
     <script>
         let table;
         let editingId = null;
-        let deletingRZBK = null;  // Store RZBK for deletion message
-        let pendingSave = null;  // Store pending save data for duplicate confirmation
+        let deletingRZBK = null; // Store RZBK for deletion message
+        let pendingSave = null; // Store pending save data for duplicate confirmation
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -151,20 +153,19 @@
                     url: './db/get_institutes.php',
                     dataSrc: ''
                 },
-                columns: [
-                    { 
+                columns: [{
                         data: 'RZBK',
-                        width: '80px'  // RZBK is max 4 digits, so this is plenty
+                        width: '80px' // RZBK is max 4 digits, so this is plenty
                     },
-                    { 
+                    {
                         data: 'Name',
-                        width: '400px'  // Give Name column fixed width to prevent wrapping
+                        width: '400px' // Give Name column fixed width to prevent wrapping
                     },
                     {
                         data: null,
                         orderable: false,
                         className: 'text-center',
-                        width: '50px',  // Set fixed width for modify column
+                        width: '50px', // Set fixed width for modify column
                         render: function(data, type, row) {
                             return `
                                 <button class="btn btn-sm btn-primary edit-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
@@ -177,7 +178,7 @@
                         data: null,
                         orderable: false,
                         className: 'text-center',
-                        width: '50px',  // Set fixed width for delete column
+                        width: '50px', // Set fixed width for delete column
                         render: function(data, type, row) {
                             return `
                                 <button class="btn btn-sm btn-danger delete-btn" data-id="${row.pk_RPA_Bankenuebersicht}">
@@ -187,7 +188,19 @@
                         }
                     }
                 ],
-                order: [[0, 'asc']]
+                order: [
+                    [0, 'asc']
+                ],
+                layout: {
+                    topStart: ['pageLength'],
+                    topEnd: ['buttons', 'search'],
+                },
+                buttons: [{
+                    text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
+                    action: function(e, dt, node, config) {
+                        dt.ajax.reload();
+                    },
+                }],
             });
 
             // Add Institute button click
@@ -195,7 +208,7 @@
                 editingId = null;
                 $('#modalTitle').text('Add Institute');
                 $('#instituteForm')[0].reset();
-                $('#rzbk').prop('readonly', false).removeClass('bg-light');  // Remove disabled appearance
+                $('#rzbk').prop('readonly', false).removeClass('bg-light'); // Remove disabled appearance
                 $('#instituteModal').modal('show');
             });
 
@@ -204,9 +217,9 @@
                 const id = $(this).data('id');
                 editingId = id;
                 const row = table.row($(this).closest('tr')).data();
-                
+
                 $('#modalTitle').text('Edit Institute');
-                $('#rzbk').val(row.RZBK).prop('readonly', true).addClass('bg-light');  // Add disabled appearance
+                $('#rzbk').val(row.RZBK).prop('readonly', true).addClass('bg-light'); // Add disabled appearance
                 $('#name').val(row.Name);
                 $('#instituteModal').modal('show');
             });
@@ -235,7 +248,9 @@
                 $.ajax({
                     url: './db/check_assigned_processes.php',
                     method: 'POST',
-                    data: JSON.stringify({ id: editingId }),
+                    data: JSON.stringify({
+                        id: editingId
+                    }),
                     contentType: 'application/json',
                     success: function(response) {
                         $('#deleteInstituteRZBK').text(deletingRZBK);
@@ -264,7 +279,7 @@
                 $('.is-invalid').removeClass('is-invalid');
                 $('#duplicateError').addClass('d-none');
                 let isValid = true;
-                
+
                 // Validate both fields
                 const rzbkField = $('#rzbk');
                 const nameField = $('#name');
@@ -273,7 +288,7 @@
                     rzbkField.addClass('is-invalid');
                     isValid = false;
                 }
-                
+
                 if (!nameField.val().trim()) {
                     nameField.addClass('is-invalid');
                     isValid = false;
@@ -355,9 +370,9 @@
                 $.ajax({
                     url: './db/delete_institute.php',
                     method: 'DELETE',
-                    data: JSON.stringify({ 
+                    data: JSON.stringify({
                         id: editingId,
-                        RZBK: deletingRZBK  // Pass RZBK to server
+                        RZBK: deletingRZBK // Pass RZBK to server
                     }),
                     contentType: 'application/json',
                     success: function(response) {
@@ -373,4 +388,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -11,7 +11,6 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <!-- <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.css" rel="stylesheet"> -->
     <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -27,7 +26,7 @@
             <a href="./institute.php" class="btn btn-outline-primary me-2 rounded">
                 <i class="bi bi-building"></i> Manage Institutes
             </a>
-            <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button class="btn btn-secondary dropdown-toggle me-2 rounded" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
             </button>
             <ul class="dropdown-menu" aria-labelledby="processDropdown" id="processMenu">
@@ -91,10 +90,9 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- DataTables -->
-    <!-- <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.2.1/b-3.2.1/datatables.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.js"></script>
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -246,12 +244,13 @@
                         ordering: false,
                         layout: {
                             topStart: ['pageLength'],
-                            topEnd: ['buttons','search'],
+                            topEnd: ['buttons', 'search'],
                         },
                         buttons: [{
                             text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
                             action: function(e, dt, node, config) {
                                 dt.ajax.reload();
+                                refreshInstitutes();
                             },
                         }, {
                             extend: 'colvis',
