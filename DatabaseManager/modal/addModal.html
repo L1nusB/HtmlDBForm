@@ -13,6 +13,20 @@
                 </div>
                 
                 <!-- Entry form -->
+                <div id="instituteSelector" class="col-12">
+                    <label for="newEntryInstitute" class="form-label">Institut</label>
+                    <div class="input-group">
+                        <select class="form-select" id="newEntryInstitute" required>
+                            <option value="" selected disabled hidden>Institut wählen...</option>
+                        </select>
+                        <button class="btn btn-outline-secondary rounded-0 rounded-end-1" type="button" id="refreshInstitutes">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback">
+                        Bitte wählen Sie ein Institut aus.
+                    </div>
+                </div>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="newEntryRZBK" class="form-label">RZBK</label>

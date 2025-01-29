@@ -83,16 +83,53 @@ function generateInstituteSelector() {
 
     return `<div id="instituteSelector" class="col-12">
                 <label for="newEntryInstitute" class="form-label">Institut</label>
-                <select class="form-select" id="newEntryInstitute" required>
-                    <option value="" selected disabled hidden>Institut wählen...</option>
-                    ${sortedInstitutes.map(([id, inst]) => 
-                        `<option value="${id}" data-rzbk="${inst.RZBK}">${inst.RZBK} - ${inst.Name}</option>`
-                    ).join('')}
-                </select>
+                <div class="input-group">
+                    <select class="form-select" id="newEntryInstitute" required>
+                        <option value="" selected disabled hidden>Institut wählen...</option>
+                        ${sortedInstitutes.map(([id, inst]) => 
+                            `<option value="${id}" data-rzbk="${inst.RZBK}">${inst.RZBK} - ${inst.Name}</option>`
+                        ).join('')}
+                    </select>
+                    <button class="btn btn-outline-secondary rounded-0 rounded-end-1" type="button" id="refreshInstitutes">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
                 <div class="invalid-feedback">
                     Bitte wählen Sie ein Institut aus.
                 </div>
             </div>`;
+}
+
+// Add this new function to handle institute refresh
+async function refreshInstitutes() {
+    try {
+        const response = await fetch('./db/refresh_institutes.php');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        if (data.success) {
+            instituteMapping = data.institutes;
+            
+            // Regenerate the institute selector
+            $('#instituteSelector').replaceWith(generateInstituteSelector());
+            
+            // Reinitialize Select2
+            $('#newEntryInstitute').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Institut suchen...',
+                allowClear: true,
+                dropdownParent: $('#addEntriesModal')
+            });
+            
+            showToast('Institute wurden aktualisiert', 'refresh', 'success');
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    } catch (error) {
+        console.error('Error refreshing institutes:', error);
+        showToast('Fehler beim Aktualisieren der Institute', 'error', 'danger');
+    }
 }
 
 function popuplateAddModal() {
@@ -100,7 +137,7 @@ function popuplateAddModal() {
     $('#tempEntriesContainer').replaceWith(generateAddModalTempTable());
     
     // Add institute selector before RZBK/Name inputs
-    $('.row.g-3').prepend(generateInstituteSelector());
+    $('#instituteSelector').replaceWith(generateInstituteSelector());
     
     // Disable RZBK/Name inputs
     $('#newEntryRZBK, #newEntryName').prop('readonly', true);
@@ -109,7 +146,7 @@ function popuplateAddModal() {
     $(document).ready(function() {
         $('#newEntryInstitute').select2({
             theme: 'bootstrap-5',
-            width: '100%',
+            width: null, // Changed from '100%' to null
             placeholder: 'Institut suchen...',
             allowClear: true,
             dropdownParent: $('#addEntriesModal')
@@ -141,4 +178,7 @@ function popuplateAddModal() {
     
     // Setup location selector
     $('#locationSelector').replaceWith(generateLocationSelector());
+
+    // Add refresh button handler
+    $(document).on('click', '#refreshInstitutes', refreshInstitutes);
 }

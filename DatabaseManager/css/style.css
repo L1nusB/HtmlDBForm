@@ -50,7 +50,7 @@ tr.modified-row:nth-of-type(even) > td {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 1050;
+    z-index: 1080;
 }
 .delete-checkbox-cell {
     width: 40px !important;
@@ -62,4 +62,16 @@ tr.modified-row:nth-of-type(even) > td {
 .table-danger > td,
 .table-danger > th {
     background-color: #f8d7da !important;
+}
+
+/* Fix for Select2 within input-group */
+.input-group > .select2-container {
+    flex: 1 1 auto;
+    width: 1% !important;
+}
+
+.input-group > .select2-container .select2-selection--single {
+    height: 100%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
