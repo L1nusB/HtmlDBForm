@@ -75,3 +75,29 @@ tr.modified-row:nth-of-type(even) > td {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
+
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    padding-left: 0 !important;  /* Remove Bootstrap's default padding */
+    padding-right: 0 !important;
+}
+
+/* Ensure the table takes full width within the scrollable container */
+.table-responsive .table {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+/* Custom class for full-width tables with no container padding */
+.table-responsive.full-width-table {
+    margin-left: -12px;
+    margin-right: -12px;
+    padding: 0;
+    overflow-x: auto;
+}
+
+.table-responsive.full-width-table .table {
+    margin: 0;
+    width: 100%;
+}

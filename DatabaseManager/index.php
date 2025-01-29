@@ -65,20 +65,22 @@
                 <i class="bi bi-x-lg"></i> Cancel
             </button>
         </div>
-        <table id="institutesTable" class="table table-striped">
-            <thead>
-                <tr>
-                    <th class="delete-checkbox-cell d-none">#</th>
-                    <th>RZBK</th>
-                    <th>Name</th>
-                    <th>Standort</th>
-                    <!-- Dynamic process columns will be added here -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be populated by DataTables -->
-            </tbody>
-        </table>
+        <div class="table-responsive full-width-table">
+            <table id="institutesTable" class="table table-striped" >
+                <thead>
+                    <tr>
+                        <th class="delete-checkbox-cell d-none">#</th>
+                        <th>RZBK</th>
+                        <th>Name</th>
+                        <th>Standort</th>
+                        <!-- Dynamic process columns will be added here -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated by DataTables -->
+                </tbody>
+            </table>
+        </div>
         <?php include './toast/toast.html'; ?>
         <?php include './modal/confirmationModal.html'; ?>
         <?php include './modal/addModal.html'; ?>
