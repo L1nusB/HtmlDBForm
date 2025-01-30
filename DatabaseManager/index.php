@@ -30,6 +30,9 @@
             <a href="./location.php" class="btn btn-outline-primary me-2">
                 <i class="bi bi-geo-alt"></i> Manage Locations
             </a>
+            <a href="./process.php" class="btn btn-outline-primary me-2">
+                <i class="bi bi-gear"></i> Manage Processes
+            </a>
         </div>
         <div class="action-buttons btn-group">
             <button class="btn btn-secondary dropdown-toggle me-2 rounded" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
