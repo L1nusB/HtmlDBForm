@@ -165,6 +165,82 @@
                 }],
             });
 
+            // Add Process button click
+            $('#addProcessBtn').click(function() {
+                $('#modalTitle').text('Add Process');
+                $('#processForm')[0].reset();
+                $('#duplicateError').addClass('d-none');
+                $('#processModal').modal('show');
+            });
+
+            // Handle modal hidden event
+            $('#processModal').on('hidden.bs.modal', function() {
+                $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+            });
+
+            // Clear error state when input changes
+            $('#processName').on('input', function() {
+                $(this).removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+            });
+
+            // Save Process
+            $('#saveProcessBtn').click(function() {
+                // Reset validation states
+                $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+                let isValid = true;
+
+                // Validate field
+                const processNameField = $('#processName');
+                if (!processNameField.val().trim()) {
+                    processNameField.addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                const data = {
+                    processName: processNameField.val().trim()
+                };
+
+                // Check for duplicates first
+                $.ajax({
+                    url: './db/check_process_duplicate.php',
+                    method: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.exists) {
+                            // Show duplicate error
+                            processNameField.addClass('is-invalid');
+                            $('#duplicateError').removeClass('d-none');
+                            showToast('Process name already exists', 'finish', 'danger');
+                        } else {
+                            // Save new process
+                            $.ajax({
+                                url: './db/save_process.php',
+                                method: 'POST',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                success: function(response) {
+                                    $('#processModal').modal('hide');
+                                    table.ajax.reload();
+                                    showToast(response.message, 'finish', response.status);
+                                },
+                                error: function(xhr) {
+                                    showToast('Error saving process', 'finish', 'error');
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking for duplicates', 'finish', 'danger');
+                    }
+                });
+            });
+
             // Placeholder for future functionality
             $('#addProcessBtn').click(function() {
                 $('#processModal').modal('show');
