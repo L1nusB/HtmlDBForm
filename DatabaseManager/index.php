@@ -256,9 +256,12 @@
                         },
                         buttons: [{
                             text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
-                            action: function(e, dt, node, config) {
+                            action: async function(e, dt, node, config) {
+                                await Promise.all([
+                                    refreshInstitutes(),
+                                    refreshLocations()
+                                ]);
                                 dt.ajax.reload();
-                                refreshInstitutes();
                             },
                         }, {
                             extend: 'colvis',

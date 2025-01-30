@@ -182,3 +182,22 @@ function insertSorted(arr, newElement, property = "RZBK") {
     arr.splice(left, 0, newElement);
     return arr;
 }
+
+// Add new function for refreshing locations
+async function refreshLocations() {
+    try {
+        const response = await fetch('./db/refresh_locations.php');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        if (data.success) {
+            locationMapping = data.locations;
+            showToast('Locations have been updated', 'refresh', 'success');
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    } catch (error) {
+        console.error('Error refreshing locations:', error);
+        showToast('Error updating locations', 'error', 'danger');
+    }
+}
