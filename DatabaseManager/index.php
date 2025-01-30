@@ -30,6 +30,9 @@
             <a href="./location.php" class="btn btn-outline-primary me-2">
                 <i class="bi bi-geo-alt"></i> Manage Locations
             </a>
+            <a href="./process.php" class="btn btn-outline-primary me-2">
+                <i class="bi bi-gear"></i> Manage Processes
+            </a>
         </div>
         <div class="action-buttons btn-group">
             <button class="btn btn-secondary dropdown-toggle me-2 rounded" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -152,9 +155,6 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    // Process data to create dynamic columns
-                    // processNames = [...new Set(data.map(item => item.Prozessname))];
-
                     // Create header columns for processes
                     processNames.forEach(process => {
                         $('#institutesTable thead tr').append(`<th>${process}</th>`);
@@ -168,119 +168,11 @@
                         `);
                     });
 
-                    // Initialize DataTable with dynamic columns
-                    table = $('#institutesTable').DataTable({
-                        ajax: {
-                            url: './db/get_data.php',
-                            dataSrc: prepareDatabaseData,
-                        },
-                        initComplete: function(settings, json) {
-                            data = table.rows().data().toArray();
-                            // Start auto-reload after initialization every 30 seconds
-                            // reloadInterval = startAutoReload(table, reloadInterval);
-                        },
-                        columns: [{
-                                data: null,
-                                title: '#',
-                                orderable: false,
-                                className: 'delete-checkbox-cell d-none',
-                                visible: false,
-                                render: function(data, type, row, meta) {
-                                    return '<input type="checkbox" class="delete-checkbox" data-row="' + meta.row + '">';
-                                },
-                                width: '40px'
-                            },
-                            {
-                                data: 'RZBK',
-                                title: 'RZBK'
-                            },
-                            {
-                                data: 'Name',
-                                title: 'Name'
-                            },
-                            {
-                                data: 'Standort',
-                                title: 'Standort',
-                                orderable: false,
-                            },
-                            ...processNames.map(process => ({
-                                data: process,
-                                className: 'checkbox-cell text-center',
-                                orderable: false,
-                                render: function(data, type, row, meta) {
-                                    // Check the state of the toggle switch
-                                    const showDates = $('#toggleDates').is(':checked');
-                                    const date = data.startDate;
-                                    const enabled = data.checked;
-
-                                    return `
-                                        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center gap-1">
-                                            <input type="checkbox" ${enabled ? 'checked' : ''} disabled 
-                                                class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
-                                                data-process="${process}" data-row="${meta.row}"
-                                                data-toggle="tooltip" title="${date ? date : ''}">
-                                            ${showDates ? 
-                                                true ? 
-                                                `<input type="date" style="width: 105px;" 
-                                                value="${formatDateStringToISO(date)}" 
-                                                class="form-control form-control-sm process-date-input" 
-                                                data-process="${process}" data-row="${meta.row}"
-                                                disabled
-                                                >` 
-                                                : '' 
-                                            : ''}
-                                            <i class="bi bi-pencil edit-field-btn d-none" data-process="${process}" data-row="${meta.row}"></i>
-                                        </div>
-                                    `;
-                                }
-                            })),
-                            {
-                                data: null,
-                                title: 'Revert',
-                                className: 'revert-cell d-none',
-                                orderable: false,
-                                visible: false,
-                                render: function(data, type, row, meta) {
-                                    return '<i class="bi bi-trash revert-btn" data-row="' + meta.row + '"></i>';
-                                }
-                            }
-                        ],
-                        order: [
-                            [1, 'asc']
-                        ],
-                        // Do not allow ordering as it messes up in editing and deleting.
-                        ordering: false,
-                        layout: {
-                            topStart: ['pageLength'],
-                            topEnd: ['buttons', 'search'],
-                        },
-                        buttons: [{
-                            text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
-                            action: async function(e, dt, node, config) {
-                                await Promise.all([
-                                    refreshInstitutes(),
-                                    refreshLocations()
-                                ]);
-                                dt.ajax.reload();
-                            },
-                        }, {
-                            extend: 'colvis',
-                            columns: ':not(.delete-checkbox-cell):not(.revert-cell)',
-                            text: 'Visibility',
-                            className: 'btn-secondary'
-                        }],
-                    });
-                    // Enable the buttons after the table is initialized
-                    enableButtons();
-
+                    // Initialize table using the shared function
+                    table = initializeTable();
+                    
                     // Populate the Add Modal with process names
                     popuplateAddModal();
-
-                    // Handle page change event (Make sure that all checkboxes/fields are shown and in the correct state)
-                    table.on('page', handlePageChange);
-                    // Handle ordering change event (Make sure that all checkboxes/fields are shown and in the correct state)
-                    // table.on('order', handleOrderingChange);
-
                     //// ----- Edit Mode ----- ////
                     {
                         // Handle Modify button click to enter Edit mode
@@ -405,7 +297,6 @@
                     console.error('Error fetching data:', error);
                 },
             });
-
         });
     </script>
 

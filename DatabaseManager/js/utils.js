@@ -201,3 +201,181 @@ async function refreshLocations() {
         showToast('Error updating locations', 'error', 'danger');
     }
 }
+
+// Add new function for refreshing processes
+async function refreshProcesses() {
+    try {
+        const response = await fetch('./db/refresh_processes.php');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        if (data.success) {
+            processMapping = data.processes;
+            processNames = data.processNames;
+            
+            // Update process columns in table
+            updateProcessColumns();
+            
+            showToast('Processes have been updated', 'refresh', 'success');
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    } catch (error) {
+        console.error('Error refreshing processes:', error);
+        showToast('Error updating processes', 'error', 'danger');
+    }
+}
+
+// Helper function to update process columns
+function updateProcessColumns() {
+    const table = $('#institutesTable').DataTable();
+    
+    // Store current column visibility states
+    const visibilityStates = {};
+    table.columns().every(function() {
+        const columnHeader = this.header().textContent;
+        visibilityStates[columnHeader] = this.visible();
+    });
+
+    // Clear existing process checkboxes in menu
+    $('#processMenu li:not(:first-child)').remove();
+
+    // Add new process checkboxes to menu
+    processNames.forEach(process => {
+        $('#processMenu').append(`
+            <li class="dropdown-item form-check">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${process}" 
+                        id="check-${process}" ${visibilityStates[process] !== false ? 'checked' : ''}>
+                    <label class="form-check-label" for="check-${process}">${process}</label>
+                </div>
+            </li>
+        `);
+    });
+
+    // Redraw table with updated columns
+    table.destroy();
+    $('#institutesTable thead tr th:gt(3)').remove(); // Remove all process columns
+    
+    // Add new process columns
+    processNames.forEach(process => {
+        $('#institutesTable thead tr').append(`<th>${process}</th>`);
+    });
+
+    // Reinitialize table
+    // Note: You'll need to reinitialize with the same configuration as before
+    // This might need to be adjusted based on your specific needs
+    initializeTable();
+}
+
+// Add function for table initialization with the same configuration as in index.php
+function initializeTable() {
+    table = $('#institutesTable').DataTable({
+        ajax: {
+            url: './db/get_data.php',
+            dataSrc: prepareDatabaseData,
+        },
+        columns: [{
+                data: null,
+                title: '#',
+                orderable: false,
+                className: 'delete-checkbox-cell d-none',
+                visible: false,
+                render: function(data, type, row, meta) {
+                    return '<input type="checkbox" class="delete-checkbox" data-row="' + meta.row + '">';
+                },
+                width: '40px'
+            },
+            {
+                data: 'RZBK',
+                title: 'RZBK'
+            },
+            {
+                data: 'Name',
+                title: 'Name'
+            },
+            {
+                data: 'Standort',
+                title: 'Standort',
+                orderable: false,
+            },
+            ...processNames.map(process => ({
+                data: process,
+                className: 'checkbox-cell text-center',
+                orderable: false,
+                render: function(data, type, row, meta) {
+                    const showDates = $('#toggleDates').is(':checked');
+                    const date = data?.startDate;
+                    const enabled = data?.checked;
+
+                    return `
+                        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center gap-1">
+                            <input type="checkbox" ${enabled ? 'checked' : ''} disabled 
+                                class="mb-1 mb-lg-0 mr-lg-2 process-checkbox" 
+                                data-process="${process}" data-row="${meta.row}"
+                                data-toggle="tooltip" title="${date ? date : ''}">
+                            ${showDates ? 
+                                `<input type="date" style="width: 105px;" 
+                                value="${formatDateStringToISO(date)}" 
+                                class="form-control form-control-sm process-date-input" 
+                                data-process="${process}" data-row="${meta.row}"
+                                disabled>` 
+                                : ''
+                            }
+                            <i class="bi bi-pencil edit-field-btn d-none" data-process="${process}" data-row="${meta.row}"></i>
+                        </div>
+                    `;
+                }
+            })),
+            {
+                data: null,
+                title: 'Revert',
+                className: 'revert-cell d-none',
+                orderable: false,
+                visible: false,
+                render: function(data, type, row, meta) {
+                    return '<i class="bi bi-trash revert-btn" data-row="' + meta.row + '"></i>';
+                }
+            }
+        ],
+        order: [[1, 'asc']],
+        ordering: false,
+        layout: {
+            topStart: ['pageLength'],
+            topEnd: ['buttons', 'search'],
+        },
+        buttons: [{
+            text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
+            action: async function(e, dt, node, config) {
+                await Promise.all([
+                    refreshInstitutes(),
+                    refreshLocations(),
+                    refreshProcesses()
+                ]);
+                dt.ajax.reload();
+            },
+        }, {
+            extend: 'colvis',
+            columns: ':not(.delete-checkbox-cell):not(.revert-cell)',
+            text: 'Visibility',
+            className: 'btn-secondary'
+        }],
+        initComplete: function(settings, json) {
+            data = this.api().rows().data().toArray();
+            
+            // Reinitialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Restore edit/delete mode if active
+            if (editMode) enableEditFields();
+            if (deleteMode) $('.delete-checkbox-cell').removeClass('d-none');
+        }
+    });
+
+    // (Re-)Enable the buttons after the table is initialized
+	enableButtons();
+
+    table.on('page', handlePageChange);
+
+    return table;
+}
