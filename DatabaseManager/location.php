@@ -145,6 +145,7 @@
         let deletingId = null; // Add variable to store ID for deletion
         let deletingLocation = null; // Add variable to store location name for deletion message
         let deletingAbbr = null; // Add variable to store location abbreviation for deletion message
+        let editingId = null; // Add variable to store ID for editing
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -212,6 +213,7 @@
 
             // Handle modal hidden event
             $('#locationModal').on('hidden.bs.modal', function() {
+                editingId = null;
                 $('.is-invalid').removeClass('is-invalid');
                 $('#duplicateError').addClass('d-none');
             });
@@ -248,34 +250,60 @@
                     abbreviation: abbreviationField.val().trim()
                 };
 
-                // Check for duplicates first
-                $.ajax({
-                    url: './db/check_location_duplicate.php',
-                    method: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
-                    success: function(response) {
-                        if (response.exists) {
-                            if (response.type === 'abbreviation') {
-                                // Show error for duplicate abbreviation
+                if (editingId) {
+                    // For editing, include the ID and use update endpoint
+                    data.id = editingId;
+                    $.ajax({
+                        url: './db/update_location.php',
+                        method: 'PUT',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            if (response.duplicate) {
                                 abbreviationField.addClass('is-invalid');
                                 $('#duplicateError').removeClass('d-none');
-                                showToast(`Abbreviation already exists for location: ${response.existingLocation}`, 'finish', 'danger');
+                                showToast(response.message, 'finish', 'danger');
                             } else {
-                                // Show confirmation modal for location name duplicate
-                                $('#duplicateLocationName').text(data.location);
-                                $('#existingAbbreviation').text(response.existingAbbreviation);
-                                pendingSave = data;
-                                $('#duplicateConfirmModal').modal('show');
+                                $('#locationModal').modal('hide');
+                                table.ajax.reload();
+                                showToast(response.message, 'finish', response.status);
                             }
-                        } else {
-                            performSave(data);
+                        },
+                        error: function(xhr) {
+                            showToast('Error updating location', 'finish', 'error');
                         }
-                    },
-                    error: function(xhr) {
-                        showToast('Error checking for duplicates', 'finish', 'danger');
-                    }
-                });
+                    });
+                } else {
+                    // For new entries, keep existing duplicate check and save logic
+                    // Check for duplicates first
+                    $.ajax({
+                        url: './db/check_location_duplicate.php',
+                        method: 'POST',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            if (response.exists) {
+                                if (response.type === 'abbreviation') {
+                                    // Show error for duplicate abbreviation
+                                    abbreviationField.addClass('is-invalid');
+                                    $('#duplicateError').removeClass('d-none');
+                                    showToast(`Abbreviation already exists for location: ${response.existingLocation}`, 'finish', 'danger');
+                                } else {
+                                    // Show confirmation modal for location name duplicate
+                                    $('#duplicateLocationName').text(data.location);
+                                    $('#existingAbbreviation').text(response.existingAbbreviation);
+                                    pendingSave = data;
+                                    $('#duplicateConfirmModal').modal('show');
+                                }
+                            } else {
+                                performSave(data);
+                            }
+                        },
+                        error: function(xhr) {
+                            showToast('Error checking for duplicates', 'finish', 'danger');
+                        }
+                    });
+                }
             });
 
             function performSave(data) {
@@ -301,6 +329,17 @@
                     performSave(pendingSave);
                     $('#duplicateConfirmModal').modal('hide');
                 }
+            });
+
+            // Edit button click
+            $('#locationTable').on('click', '.edit-btn', function() {
+                const row = table.row($(this).closest('tr')).data();
+                editingId = row.pk_RPA_Standort;
+
+                $('#modalTitle').text('Edit Location');
+                $('#location').val(row.Standort);
+                $('#abbreviation').val(row.Standort_Kuerzel);
+                $('#locationModal').modal('show');
             });
 
             // Delete button click
