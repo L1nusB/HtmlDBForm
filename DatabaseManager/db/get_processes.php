@@ -29,8 +29,8 @@ try {
 
     // Pass the mapping and set to JavaScript
     echo "<script>
-            const processMapping = " . json_encode($data) . ";
-            const processNames = " . json_encode(array_values(array_unique($prozessnameSet))) . ";
+            let processMapping = " . json_encode($data) . ";
+            let processNames = " . json_encode(array_values(array_unique($prozessnameSet))) . ";
         </script>";
 } catch (Exception $e) {
     http_response_code(500);
