@@ -245,6 +245,66 @@
             $('#addProcessBtn').click(function() {
                 $('#processModal').modal('show');
             });
+
+            let deletingId = null;
+            let deletingProcessName = null;
+
+            // Delete button click
+            $('#processTable').on('click', '.delete-btn', function() {
+                const row = table.row($(this).closest('tr')).data();
+                deletingId = row.pk_RPA_Prozesse;
+                deletingProcessName = row.Prozessname;
+
+                // Check for assigned processes before showing delete modal
+                $.ajax({
+                    url: './db/check_process_assignments.php',
+                    method: 'POST',
+                    data: JSON.stringify({ id: deletingId }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#deleteProcessName').text(deletingProcessName);
+                        if (response.hasAssignments) {
+                            $('#assignedInstituteWarning').removeClass('d-none');
+                        } else {
+                            $('#assignedInstituteWarning').addClass('d-none');
+                        }
+                        $('#deleteModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking assignments', 'finish', 'error');
+                    }
+                });
+            });
+
+            // Reset warning when modal is hidden
+            $('#deleteModal').on('hidden.bs.modal', function() {
+                $('#assignedInstituteWarning').addClass('d-none');
+                deletingId = null;
+                deletingProcessName = null;
+            });
+
+            // Confirm Delete
+            $('#confirmDeleteBtn').click(function() {
+                if (!deletingId) return;
+
+                $.ajax({
+                    url: './db/delete_process.php',
+                    method: 'DELETE',
+                    data: JSON.stringify({
+                        id: deletingId,
+                        processName: deletingProcessName
+                    }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#deleteModal').modal('hide');
+                        table.ajax.reload();
+                        showToast(response.message, 'finish', response.status);
+                    },
+                    error: function(xhr) {
+                        showToast('Error deleting process', 'finish', 'error');
+                    }
+                });
+            });
         });
     </script>
 </body>
