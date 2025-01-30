@@ -22,10 +22,16 @@
 <body>
     <div class="container mt-5">
         <h2>Institute Process Overview</h2>
-        <div class="action-buttons btn-group">
-            <a href="./institute.php" class="btn btn-outline-primary me-2 rounded">
+        <!-- Add new navigation row -->
+        <div class="navigation-buttons mb-3">
+            <a href="./institute.php" class="btn btn-outline-primary me-2">
                 <i class="bi bi-building"></i> Manage Institutes
             </a>
+            <a href="./location.php" class="btn btn-outline-primary me-2">
+                <i class="bi bi-geo-alt"></i> Manage Locations
+            </a>
+        </div>
+        <div class="action-buttons btn-group">
             <button class="btn btn-secondary dropdown-toggle me-2 rounded" type="button" id="processDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-gear"></i> <!-- Bootstrap Icons gear icon -->
             </button>
@@ -122,8 +128,8 @@
     <?php include './db/get_processes.php'; ?>
 
     <script>
-        // let testMode = false;
-        let testMode = true;
+        let testMode = false;
+        // let testMode = true;
         let table;
         let data;
         // let processNames;
@@ -250,9 +256,12 @@
                         },
                         buttons: [{
                             text: '<i class="bi bi-arrow-clockwise"></i> Refresh',
-                            action: function(e, dt, node, config) {
+                            action: async function(e, dt, node, config) {
+                                await Promise.all([
+                                    refreshInstitutes(),
+                                    refreshLocations()
+                                ]);
                                 dt.ajax.reload();
-                                refreshInstitutes();
                             },
                         }, {
                             extend: 'colvis',
