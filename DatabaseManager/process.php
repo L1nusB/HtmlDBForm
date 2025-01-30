@@ -185,6 +185,25 @@
                 $('#duplicateError').addClass('d-none');
             });
 
+            let editingId = null;
+
+            // Edit button click
+            $('#processTable').on('click', '.edit-btn', function() {
+                const row = table.row($(this).closest('tr')).data();
+                editingId = row.pk_RPA_Prozesse;
+                
+                $('#modalTitle').text('Edit Process');
+                $('#processName').val(row.Prozessname);
+                $('#processModal').modal('show');
+            });
+
+            // Reset editingId when modal is hidden
+            $('#processModal').on('hidden.bs.modal', function() {
+                editingId = null;
+                $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+            });
+
             // Save Process
             $('#saveProcessBtn').click(function() {
                 // Reset validation states
@@ -204,6 +223,32 @@
                 const data = {
                     processName: processNameField.val().trim()
                 };
+
+                // If editing, include ID and use update endpoint
+                if (editingId) {
+                    data.id = editingId;
+                    $.ajax({
+                        url: './db/update_process.php',
+                        method: 'PUT',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            if (response.duplicate) {
+                                processNameField.addClass('is-invalid');
+                                $('#duplicateError').removeClass('d-none');
+                                showToast('Process name already exists', 'finish', 'danger');
+                            } else {
+                                $('#processModal').modal('hide');
+                                table.ajax.reload();
+                                showToast(response.message, 'finish', response.status);
+                            }
+                        },
+                        error: function(xhr) {
+                            showToast('Error updating process', 'finish', 'error');
+                        }
+                    });
+                    return;
+                }
 
                 // Check for duplicates first
                 $.ajax({
