@@ -10,7 +10,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-colvis-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.1/b-3.2.1/b-html5-3.2.1/b-print-3.2.1/datatables.min.css" rel="stylesheet">
     <!-- Custom styles -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -92,7 +92,12 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you want to delete location <strong><span id="deleteLocationName"></span></strong>?</p>
+                        <p>Are you sure you want to delete location <strong><span id="deleteLocationName"></span> (<span id="deleteLocationAbbr"></span>)</strong>?</p>
+                        <div id="assignedProcessesWarning" class="alert alert-warning d-none">
+                            <p class="fw-bold">This location has process assignments.</p>
+                            <hr>
+                            <p class="mb-0 fw-bold">These process assignments will also be deleted.</p>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -136,7 +141,10 @@
 
     <script>
         let table;
-        let pendingSave = null; // Store pending save data for duplicate confirmation
+        let pendingSave = null;
+        let deletingId = null; // Add variable to store ID for deletion
+        let deletingLocation = null; // Add variable to store location name for deletion message
+        let deletingAbbr = null; // Add variable to store location abbreviation for deletion message
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -293,6 +301,63 @@
                     performSave(pendingSave);
                     $('#duplicateConfirmModal').modal('hide');
                 }
+            });
+
+            // Delete button click
+            $('#locationTable').on('click', '.delete-btn', function() {
+                const row = table.row($(this).closest('tr')).data();
+                deletingId = row.pk_RPA_Standort;
+                deletingLocation = row.Standort;
+                deletingAbbr = row.Standort_Kuerzel;
+
+                // Check for assigned processes before showing delete modal
+                $.ajax({
+                    url: './db/check_location_assignments.php',
+                    method: 'POST',
+                    data: JSON.stringify({ id: deletingId }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#deleteLocationName').text(deletingLocation);
+                        $('#deleteLocationAbbr').text(deletingAbbr);
+                        if (response.hasAssignments) {
+                            $('#assignedProcessesWarning').removeClass('d-none');
+                        } else {
+                            $('#assignedProcessesWarning').addClass('d-none');
+                        }
+                        $('#deleteModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking process assignments', 'finish', 'error');
+                    }
+                });
+            });
+
+            // Reset warning when modal is hidden
+            $('#deleteModal').on('hidden.bs.modal', function() {
+                $('#assignedProcessesWarning').addClass('d-none');
+            });
+
+            // Confirm Delete
+            $('#confirmDeleteBtn').click(function() {
+                if (!deletingId) return;
+
+                $.ajax({
+                    url: './db/delete_location.php',
+                    method: 'DELETE',
+                    data: JSON.stringify({
+                        id: deletingId,
+                        location: deletingLocation
+                    }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#deleteModal').modal('hide');
+                        table.ajax.reload();
+                        showToast(response.message || `Location ${deletingLocation} deleted successfully`, 'finish', response.status);
+                    },
+                    error: function(xhr) {
+                        showToast('Error deleting location', 'finish', 'error');
+                    }
+                });
             });
         });
     </script>

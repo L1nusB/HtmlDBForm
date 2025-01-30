@@ -128,8 +128,8 @@
     <?php include './db/get_processes.php'; ?>
 
     <script>
-        // let testMode = false;
-        let testMode = true;
+        let testMode = false;
+        // let testMode = true;
         let table;
         let data;
         // let processNames;
