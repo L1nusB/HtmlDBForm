@@ -69,6 +69,10 @@
                                     Please provide an abbreviation.
                                 </div>
                             </div>
+                            <!-- Add duplicate error message container -->
+                            <div id="duplicateError" class="alert alert-danger d-none">
+                                This abbreviation is already in use.
+                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -97,6 +101,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Duplicate Location Name Confirmation Modal -->
+        <div class="modal fade" id="duplicateConfirmModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Duplicate Location Name</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>A location named <strong><span id="duplicateLocationName"></span></strong> already exists with abbreviation: <strong><span id="existingAbbreviation"></span></strong></p>
+                        <p>Do you want to create another location with the same name but different abbreviation?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmDuplicateBtn">Create Anyway</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- jQuery -->
@@ -112,6 +136,7 @@
 
     <script>
         let table;
+        let pendingSave = null; // Store pending save data for duplicate confirmation
 
         $(document).ready(function() {
             // Initialize DataTable
@@ -168,6 +193,106 @@
                         dt.ajax.reload();
                     },
                 }],
+            });
+
+            // Add Location button click
+            $('#addLocationBtn').click(function() {
+                $('#modalTitle').text('Add Location');
+                $('#locationForm')[0].reset();
+                $('#locationModal').modal('show');
+            });
+
+            // Handle modal hidden event
+            $('#locationModal').on('hidden.bs.modal', function() {
+                $('.is-invalid').removeClass('is-invalid');
+                $('#duplicateError').addClass('d-none');
+            });
+
+            // Clear error state when inputs change
+            $('#location, #abbreviation').on('input', function() {
+                $(this).removeClass('is-invalid');
+            });
+
+            // Save Location
+            $('#saveLocationBtn').click(function() {
+                // Reset validation states
+                $('.is-invalid').removeClass('is-invalid');
+                let isValid = true;
+
+                // Validate fields
+                const locationField = $('#location');
+                const abbreviationField = $('#abbreviation');
+
+                if (!locationField.val().trim()) {
+                    locationField.addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (!abbreviationField.val().trim()) {
+                    abbreviationField.addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                const data = {
+                    location: locationField.val().trim(),
+                    abbreviation: abbreviationField.val().trim()
+                };
+
+                // Check for duplicates first
+                $.ajax({
+                    url: './db/check_location_duplicate.php',
+                    method: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.exists) {
+                            if (response.type === 'abbreviation') {
+                                // Show error for duplicate abbreviation
+                                abbreviationField.addClass('is-invalid');
+                                $('#duplicateError').removeClass('d-none');
+                                showToast(`Abbreviation already exists for location: ${response.existingLocation}`, 'finish', 'danger');
+                            } else {
+                                // Show confirmation modal for location name duplicate
+                                $('#duplicateLocationName').text(data.location);
+                                $('#existingAbbreviation').text(response.existingAbbreviation);
+                                pendingSave = data;
+                                $('#duplicateConfirmModal').modal('show');
+                            }
+                        } else {
+                            performSave(data);
+                        }
+                    },
+                    error: function(xhr) {
+                        showToast('Error checking for duplicates', 'finish', 'danger');
+                    }
+                });
+            });
+
+            function performSave(data) {
+                $.ajax({
+                    url: './db/save_location.php',
+                    method: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#locationModal').modal('hide');
+                        table.ajax.reload();
+                        showToast(response.message, 'finish', response.status);
+                    },
+                    error: function(xhr) {
+                        showToast('Error saving location', 'finish', 'error');
+                    }
+                });
+            }
+
+            // Handle duplicate confirmation
+            $('#confirmDuplicateBtn').click(function() {
+                if (pendingSave) {
+                    performSave(pendingSave);
+                    $('#duplicateConfirmModal').modal('hide');
+                }
             });
         });
     </script>
